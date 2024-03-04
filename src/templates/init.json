@@ -1,23 +1,23 @@
 {
-  "ideas": [
-    {
-      "name": "Project application iphone",
-      "createdAt": 1709162248782,
-      "content": "IyBUbyBEbzoKLSBbXSBUYXNrIG9uZS4KLSBbeF0gVGFzayB0d28",
-      "keywords": [
-        "project",
-        "iphone"
-      ],
-      "color": "Yellow"
-    }
-  ],
-  "work": [
-    {
-      "name": "To do",
-      "createdAt": 1709126343351,
-      "content": "IyBUbyBEbzoKLSBbXSBUYXNrIG9uZS4KLSBbeF0gVGFzayB0d28",
-      "keywords": [],
-      "color": "Magenta"
-    }
-  ]
+  "ideas": {
+    "color": "Yellow",
+    "papers": [
+      {
+        "name": "Project application iphone",
+        "createdAt": 1709162248782,
+        "content": "IyBUbyBEbzoKLSBbXSBUYXNrIG9uZS4KLSBbeF0gVGFzayB0d28",
+        "description": "App with intereting areas around me"
+      }
+    ]
+  },
+  "work": {
+    "color": "Magenta",
+    "papers": [
+      {
+        "name": "To do",
+        "createdAt": 1709126343351,
+        "content": "IyBUbyBEbzoKLSBbXSBUYXNrIG9uZS4KLSBbeF0gVGFzayB0d28"
+      }
+    ]
+  }
 }

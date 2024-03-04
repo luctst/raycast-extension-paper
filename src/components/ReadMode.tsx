@@ -1,26 +1,27 @@
-import { Action, ActionPanel, Detail } from '@raycast/api';
+import { Action, ActionPanel, Detail, Icon } from '@raycast/api';
 import { FC, memo, useEffect, useState } from 'react';
 import { decode } from '../utils/base64';
-import { Mode, PaperToRead } from '../types';
+import { PaperDataSwitchMode, SwitchMode } from '../types';
 
 type ReadModeProps = {
-  content: PaperToRead;
-  switchMode: (newMode: Mode) => void;
+  paperDatas: PaperDataSwitchMode;
+  switchMode: SwitchMode;
 };
 
-export const ReadMode: FC<ReadModeProps> = memo(function ReadMode({ content, switchMode }) {
+export const ReadMode: FC<ReadModeProps> = memo(function ReadMode({ paperDatas, switchMode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [markdown, setMarkdown] = useState<string>('');
 
   useEffect(() => {
-    setMarkdown(decode(content.content));
+    setMarkdown(decode(paperDatas.paper.content));
     setIsLoading(false);
   }, []);
 
   return (
-    <Detail isLoading={isLoading} markdown={markdown} navigationTitle={content.name} actions={
+    <Detail isLoading={isLoading} markdown={markdown} navigationTitle={paperDatas.paper.name} actions={
       <ActionPanel>
-        <Action title='List All Your Papers' autoFocus={true} onAction={() => { switchMode('list') }}/>
+        <Action title='List All Your Papers' autoFocus={true} onAction={() => { switchMode('list', paperDatas) }} icon={Icon.List}/>
+        <Action title='Edit Paper' onAction={() => switchMode('edit', paperDatas)} shortcut={{ modifiers: ['cmd'], key: 'e', }} icon={Icon.Paragraph}/>
       </ActionPanel>
     }/>
   );

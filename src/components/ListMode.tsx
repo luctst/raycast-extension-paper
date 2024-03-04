@@ -1,14 +1,27 @@
-import { List, ActionPanel, Action, Icon, Color } from '@raycast/api';
-import { FC, memo, useState, useEffect, useMemo, useCallback } from 'react';
-import { Mode, Paper, PaperToRead } from '../types';
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { FC, memo, useState } from "react";
+import { Paper, PaperRawData, SwitchMode } from "../types";
 
 type ListModeProps = {
   isLoading: boolean;
-  paperDataRaw: Paper;
-  switchMode: (newMode: Mode, fileMetadata: PaperToRead) => void;
+  paperDataRaw: PaperRawData;
+  switchMode: SwitchMode;
+  categories: Array<string>;
 };
 
-function PaperSearchBarDropdown({ onChange, isLoading, categories }) {
+type PaperSearchBarDropdownProps = {
+  onChange: (value: string) => void;
+  isLoading: boolean;
+  categories: Array<string>;
+};
+
+type ListItemActionsProps = {
+  paper: Paper;
+  category: string;
+  index: number;
+};
+
+const PaperSearchBarDropdown: FC<PaperSearchBarDropdownProps> = ({ onChange, isLoading, categories }) => {
   return (
     <List.Dropdown
       tooltip="Select a category"
@@ -24,76 +37,91 @@ function PaperSearchBarDropdown({ onChange, isLoading, categories }) {
       ))}
     </List.Dropdown>
   );
-}
+};
 
-export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw, isLoading, switchMode }) {
+export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw, isLoading, switchMode, categories }) {
   const [categoryActive, setCategoryActive] = useState<string>();
-  const [paper, setPaper] = useState([]);
-
-  const getCategories = useMemo(() => {
-    if (!paperDataRaw) return [];
-    return Object.keys(paperDataRaw).map((key) => key.charAt(0).toUpperCase() + key.slice(1));
-  }, [paperDataRaw]);
 
   const onChange = (value: string) => {
     setCategoryActive(value);
   };
 
-  const generateAccessoriesProps = useCallback((itemData) => {
-    const accessories = [{ date: new Date(itemData.createdAt), icon: Icon.Calendar }];
+  const ListItemActions: FC<ListItemActionsProps> = ({ paper, category, index }) => {
+    return (
+        <ActionPanel>
+          <Action
+            title="Read Paper"
+            autoFocus={true}
+            onAction={() => {
+              switchMode("read", { paper, category, index });
+            }}
+            icon={Icon.List}
+          />
+          <Action
+            title="Edit Paper"
+            onAction={() => switchMode("edit", { paper, category, index })}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            icon={Icon.Paragraph}
+          />
+        </ActionPanel>
+    );
+  }
 
-    itemData.keywords.forEach((keyword) => accessories.push({ tag: { value: keyword, color: Color[itemData.color] } }));
+  ListItemActions.displayName = 'ListItemActions';
 
-    return accessories;
-  }, []);
+  const ListToRender: FC = () => {
+    if (!categoryActive || !paperDataRaw) return;
+    if (categoryActive === "all") {
+      const categories = Object.keys(paperDataRaw);
 
-  useEffect(() => {
-    if (!paperDataRaw) return;
-    const papersDataFiltered = Object.keys(paperDataRaw)
-      .map((key) => {
-        const objToReturn = {
-          category: key,
-          childrens: paperDataRaw[key],
-        };
+      return categories.map((category, y) => (
+        <List.Section title={category} subtitle={paperDataRaw[category].papers.length.toString()} key={y}>
+          {paperDataRaw[category].papers.map((paper, i) => (
+            <List.Item
+              key={i}
+              title={paper.name}
+              accessories={[
+                { text: { value: paper.description || "", color: Color[paperDataRaw[category].color] } },
+                { date: new Date(paper.createdAt), icon: Icon.Calendar },
+              ]}
+              icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[category].color] }}
+              actions={<ListItemActions  paper={paper} category={category} index={i}/>}
+            />
+          ))}
+        </List.Section>
+      ));
+    }
 
-        if (categoryActive === "all") return { ...objToReturn };
-        if (key !== categoryActive) return null;
-        return { ...objToReturn };
-      })
-      .filter((item) => item !== null);
+    ListToRender.displayName = 'ListToRender';
 
-    setPaper(papersDataFiltered);
-  }, [categoryActive, paperDataRaw]);
+    return (
+      <List.Section title={categoryActive} subtitle={paperDataRaw[categoryActive].papers.length.toString()}>
+        {paperDataRaw[categoryActive].papers.map((paper, p) => (
+          <List.Item
+            title={paper.name}
+            key={p}
+            icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[categoryActive].color] }}
+            accessories={[
+              { text: { value: paper.description || "", color: Color[paperDataRaw[categoryActive].color] } },
+              { date: new Date(paper.createdAt), icon: Icon.Calendar },
+            ]}
+            actions={<ListItemActions paper={paper} category={categoryActive} index={p}/>}
+          />
+        ))}
+      </List.Section>
+    );
+  };
 
   return (
     <List
       searchBarPlaceholder={isLoading ? "Fetching..." : "Search a paper"}
-      searchBarAccessory={
-        <PaperSearchBarDropdown onChange={onChange} isLoading={isLoading} categories={getCategories} />
-      }
+      searchBarAccessory={<PaperSearchBarDropdown onChange={onChange} isLoading={isLoading} categories={categories} />}
       throttle={true}
       isLoading={isLoading}
     >
-      {paper.map((pp, index) => (
-        <List.Section title={pp.category} subtitle={pp.childrens.length.toString()} key={index}>
-          {pp.childrens.map((ppChild, key) => (
-            <List.Item
-              key={key}
-              title={ppChild.name}
-              accessories={generateAccessoriesProps(ppChild)}
-              keywords={ppChild.keywords}
-              icon={{ source: Icon.Circle, tintColor: Color[ppChild.color] }}
-              actions={
-                <ActionPanel>
-                  <Action title="Read Paper" autoFocus={true} onAction={() => { switchMode('read', { content: ppChild.content, name: ppChild.name }) }}/>
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+      <ListToRender />
     </List>
   );
-})
+});
 
-ListMode.displayName = 'ListMode';
+ListMode.displayName = "ListMode";
