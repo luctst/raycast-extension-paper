@@ -196,6 +196,45 @@ export default function Command() {
     }
   }, [paperDataRaw])
 
+  const onActionDeletePaper = useCallback(async (category: string, index: number) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Delete Paper`,
+    });
+
+    if (category === 'deleted') {
+      toast.style = Toast.Style.Failure;
+      toast.title = 'Paper already deleted';
+      return;
+    };
+
+    try {
+      const newPaperRawData = { ...paperDataRaw };
+      const paper = newPaperRawData[category].papers[index];
+
+      newPaperRawData[category].papers.splice(index, 1);
+
+      if (!newPaperRawData.deleted) {
+        newPaperRawData.deleted = {
+          color: 'SecondaryText',
+          papers: []
+        }
+      }
+
+      newPaperRawData.deleted.papers.push(paper);
+
+      const newConfigFile = await updateConfigFile(newPaperRawData);
+      setPaperDataRaw(JSON.parse(newConfigFile as string));
+      setMode('list');
+
+      toast.style = Toast.Style.Success;
+      toast.title = 'Paper Deleted';
+    } catch(error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Oups.. An error occured, please try again";
+    }
+  }, [paperDataRaw])
+
   useEffect(() => {
     const getPaper = async () => {
       const paperConfig = await getConfig();
@@ -220,9 +259,9 @@ export default function Command() {
 
   if (mode === "list")
     return (
-      <ListMode isLoading={isLoading} paperDataRaw={paperDataRaw} switchMode={switchMode} categories={getCategories} />
+      <ListMode isLoading={isLoading} paperDataRaw={paperDataRaw} switchMode={switchMode} categories={getCategories} onActionDeletePaper={onActionDeletePaper}/>
     );
-  if (mode === "read") return <ReadMode paperDatas={paperToRead as PaperDataSwitchMode} switchMode={switchMode} />;
+  if (mode === "read") return <ReadMode paperDatas={paperToRead as PaperDataSwitchMode} switchMode={switchMode} onActionDeletePaper={onActionDeletePaper} />;
   if (mode === "edit")
     return (
       <EditMode

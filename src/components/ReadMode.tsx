@@ -6,9 +6,10 @@ import { PaperDataSwitchMode, SwitchMode } from '../types';
 type ReadModeProps = {
   paperDatas: PaperDataSwitchMode;
   switchMode: SwitchMode;
+  onActionDeletePaper: (category: string, index: number) => void;
 };
 
-export const ReadMode: FC<ReadModeProps> = memo(function ReadMode({ paperDatas, switchMode }) {
+export const ReadMode: FC<ReadModeProps> = memo(function ReadMode({ paperDatas, switchMode, onActionDeletePaper }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [markdown, setMarkdown] = useState<string>('');
 
@@ -39,6 +40,13 @@ export const ReadMode: FC<ReadModeProps> = memo(function ReadMode({ paperDatas, 
           shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
           onAction={() => switchMode("delete-category")}
           icon={Icon.Trash}
+        />
+        <Action
+          title="Delete Paper"
+          shortcut={{ modifiers: ['cmd'], key: 'deleteForward' }}
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={() => onActionDeletePaper(paperDatas.category, paperDatas.index)}
         />
       </ActionPanel>
     }/>

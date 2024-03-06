@@ -85,6 +85,12 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
             onAction={() => switchMode("update-category")}
             icon={Icon.Switch}
           />
+          <Action
+            title="Delete Category"
+            shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
+            onAction={() => switchMode("delete-category")}
+            icon={Icon.Trash}
+          />
         </ActionPanel>
       }
     >
@@ -93,7 +99,10 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
       <Form.TextArea id="content" value={content} storeValue={true} title="Content" onChange={setContent} enableMarkdown={true}/>
       <Form.Dropdown id="category" title="Category" value={category} onChange={setCategory} storeValue={true} throttle={true}>
         {
-          categories.map((category, index) => <Form.Dropdown.Item title={category} value={category.toLowerCase()} key={index} />)
+          categories.map((category, index) => {
+            if (category === 'Deleted') return null;
+            return <Form.Dropdown.Item title={category} value={category.toLowerCase()} key={index} />
+          })
         }
       </Form.Dropdown>
       <Form.TextField id="description" placeholder="Enter a description" info="Optional field" storeValue={true} value={description} onChange={setDescription} title="Description"/>

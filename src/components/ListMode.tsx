@@ -7,6 +7,7 @@ type ListModeProps = {
   paperDataRaw: PaperRawData;
   switchMode: SwitchMode;
   categories: Array<string>;
+  onActionDeletePaper: (category: string, index: number) => void;
 };
 
 type PaperSearchBarDropdownProps = {
@@ -39,7 +40,7 @@ const PaperSearchBarDropdown: FC<PaperSearchBarDropdownProps> = ({ onChange, isL
   );
 };
 
-export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw, isLoading, switchMode, categories }) {
+export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw, isLoading, switchMode, categories, onActionDeletePaper }) {
   const [categoryActive, setCategoryActive] = useState<string>();
 
   const onChange = (value: string) => {
@@ -80,6 +81,13 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
           shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
           onAction={() => switchMode("delete-category")}
           icon={Icon.Trash}
+        />
+        <Action
+          title="Delete Paper"
+          shortcut={{ modifiers: ['cmd'], key: 'deleteForward' }}
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={() => onActionDeletePaper(category, index)}
         />
       </ActionPanel>
     );
