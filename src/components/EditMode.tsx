@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { FC, FormEvent, memo, useEffect, useState } from "react";
+import { FC, memo, useEffect, useState } from "react";
 import { Paper, PaperDataSwitchMode, SwitchMode } from "../types";
 import { decode } from "../utils/base64";
 
@@ -17,7 +17,7 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [name, setName] = useState<string>(defaultValues.name || "");
-  const [nameError, setNameError] = useState<string | undefined>();
+  const [nameError, setNameError] = useState<string | undefined>();
 
   const [createdAt, setCreatedAt] = useState<Date | null>(new Date(defaultValues.createdAt) || "");
   const [createdAtError, setCreatedAtError] = useState<string | undefined>();
@@ -28,7 +28,7 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
 
   const [description, setDescription] = useState<string>(defaultValues.description || '');
 
-  const onBlurName = (event: FormEvent<string>) => {
+  const onBlurName = (event) => {
     if (event.target.value.length <= 0) {
       if (nameError) return;
 
@@ -63,7 +63,7 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
       navigationTitle={`Edit ${paperDatas.paper.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={(values) => onSubmit(values, paperDatas.category, paperDatas.index)}/>
+          <Action.SubmitForm title="Submit" onSubmit={(values: Paper & { category: string;}) => onSubmit(values, paperDatas.category, paperDatas.index)} icon={Icon.Redo}/>
           <Action
             title="Go Back To List Mode"
             autoFocus={true}
@@ -72,6 +72,12 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
             shortcut={
               { modifiers: ['cmd'], key: 'l' }
             }
+          />
+          <Action
+            title="Create New Category"
+            shortcut={{ modifiers: ['cmd'], key: 'n' }}
+            onAction={() => switchMode('create-category')}
+            icon={Icon.NewDocument}
           />
         </ActionPanel>
       }

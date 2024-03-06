@@ -1,10 +1,11 @@
 import { showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { getConfig } from "./utils/getConfig";
-import { Mode, SwitchMode, PaperDataSwitchMode, PaperRawData, Paper } from "./types";
+import { Mode, SwitchMode, PaperDataSwitchMode, PaperRawData, Paper, CategoryToUpdate } from "./types";
 import { ListMode } from "./components/ListMode";
 import { ReadMode } from "./components/ReadMode";
 import { EditMode } from "./components/EditMode";
+import { CreateCategory } from './components/CreateCategory';
 import { encode } from "./utils/base64";
 import { updateConfigFile } from "./utils/updateConfigFile";
 
@@ -32,7 +33,7 @@ export default function Command() {
     async (paperData, oldCategory, index) => {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Updating..",
+        title: mode === 'edit' ? "Updating.." : 'Create New Paper...',
       });
 
       try {
@@ -47,9 +48,27 @@ export default function Command() {
         };
         const newPaperRawData = { ...paperDataRaw };
 
-        if (paperData.category !== oldCategory) {
-          newPaperRawData[oldCategory].papers.splice(index, 1);
-          newPaperRawData[paperData.category].papers.push(objFormated);
+        if (mode === 'create-paper') {
+          return;
+        }
+
+        if (mode === 'edit') {
+          if (paperData.category !== oldCategory) {
+            newPaperRawData[oldCategory].papers.splice(index, 1);
+            newPaperRawData[paperData.category].papers.push(objFormated);
+
+            const newConfigFile = await updateConfigFile(newPaperRawData);
+
+            setPaperDataRaw(JSON.parse(newConfigFile as string));
+            setMode('list');
+
+            toast.style = Toast.Style.Success;
+            toast.title = 'Success';
+
+            return;
+          }
+
+          newPaperRawData[paperData.category].papers[index] = { ...objFormated };
 
           const newConfigFile = await updateConfigFile(newPaperRawData);
 
@@ -57,27 +76,41 @@ export default function Command() {
           setMode('list');
 
           toast.style = Toast.Style.Success;
-          toast.message = 'Success';
-
-          return;
+          toast.title = 'Success';
         }
-
-        newPaperRawData[paperData.category].papers[index] = { ...objFormated };
-
-        const newConfigFile = await updateConfigFile(newPaperRawData);
-
-        setPaperDataRaw(JSON.parse(newConfigFile as string));
-        setMode('list');
-
-        toast.style = Toast.Style.Success;
-        toast.message = 'Success';
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Oups.. An error occured, please try again";
       }
     },
-    [paperDataRaw],
+    [paperDataRaw, mode],
   );
+
+  const onSubmitCategory = useCallback(async (values: CategoryToUpdate) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: 'Create new category..',
+    });
+
+    try {
+      const newPaperRawData = { ...paperDataRaw };
+
+      newPaperRawData[values.category.toLowerCase()] = {
+        color: values.color,
+        papers: []
+      }
+
+      const newConfigFile = await updateConfigFile(newPaperRawData);
+      setPaperDataRaw(JSON.parse(newConfigFile as string));
+      setMode('list');
+
+      toast.style = Toast.Style.Success;
+      toast.title = 'New Category Created';
+    } catch(error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Oups.. An error occured, please try again";
+    }
+  }, [paperDataRaw]);
 
   useEffect(() => {
     const getPaper = async () => {
@@ -115,4 +148,5 @@ export default function Command() {
         onSubmit={onSubmit}
       />
     );
+  if (mode === 'create-category') return <CreateCategory switchMode={switchMode} onSubmit={onSubmitCategory} />;
 }

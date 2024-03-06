@@ -61,7 +61,13 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
             title="Edit Paper"
             onAction={() => switchMode("edit", { paper, category, index })}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
-            icon={Icon.Paragraph}
+            icon={Icon.Pencil}
+          />
+          <Action
+            title="Create New Category"
+            shortcut={{ modifiers: ['cmd'], key: 'n' }}
+            onAction={() => switchMode("create-category")}
+            icon={Icon.NewDocument}
           />
         </ActionPanel>
     );

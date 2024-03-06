@@ -25,11 +25,16 @@ export type PaperRawData = Record<string, {
   papers: Array<Paper>;
 }>
 
-export type Mode = 'list' | 'read' | 'edit';
+export type Mode = 'list' | 'read' | 'edit' | 'create-category' | 'create-paper' | 'update-category' | 'delete-category';
 
 export type PaperToRead = {
   content: string;
   name: string;
+};
+
+export type CategoryToUpdate = {
+  category: string;
+  color: string;
 };
 
 export type PaperDataSwitchMode = {
@@ -38,4 +43,4 @@ export type PaperDataSwitchMode = {
   category: string;
 };
 
-export type SwitchMode = (newMode: Mode, paperDatas: PaperDataSwitchMode ) => void;
+export type SwitchMode = (newMode: Mode, paperDatas?: PaperDataSwitchMode ) => void;
