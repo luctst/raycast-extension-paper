@@ -34,6 +34,12 @@ export const ReadMode: FC<ReadModeProps> = memo(function ReadMode({ paperDatas, 
           onAction={() => switchMode("update-category")}
           icon={Icon.Switch}
         />
+        <Action
+          title="Delete Category"
+          shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
+          onAction={() => switchMode("delete-category")}
+          icon={Icon.Trash}
+        />
       </ActionPanel>
     }/>
   );

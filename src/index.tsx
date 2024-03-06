@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { getConfig } from "./utils/getConfig";
 import { Mode, SwitchMode, PaperDataSwitchMode, PaperRawData, Paper, CategoryToUpdate } from "./types";
@@ -9,6 +9,7 @@ import { CreateCategory } from './components/CreateCategory';
 import { encode } from "./utils/base64";
 import { updateConfigFile } from "./utils/updateConfigFile";
 import { UpdateCategory } from "./components/UpdateCategory";
+import { DeleteCategory } from "./components/DeleteCategory";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -93,6 +94,12 @@ export default function Command() {
       title: 'Create new category..',
     });
 
+    if (values.category.toLowerCase().trim() === 'deleted') {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Deleted is a special category which is created when you delete papers or category`;
+      return;
+    }
+
     if (getCategories.includes(values.category.charAt(0).toUpperCase() + values.category.slice(1))) {
       toast.style = Toast.Style.Failure;
       toast.title = `${values.category} already exist`;
@@ -148,11 +155,46 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = 'Category updated';
     } catch(error) {
-      console.error(error);
       toast.style = Toast.Style.Failure;
       toast.title = "Oups.. An error occured, please try again";
     }
   }, [paperDataRaw, getCategories]);
+
+  const onSubmitDeleteCategory = useCallback(async ({ category }) => {
+    const userWanteDelete = await confirmAlert({ title: `Delete ${category} ?`, message: 'Are you sur to delete this category all papers related to will be moved in the deleted category', primaryAction: { style: Alert.ActionStyle.Destructive, title: 'Delete' }});
+
+    if (userWanteDelete === false) return;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Delete ${category} Category`,
+    });
+
+    try {
+      const newPaperRawData = { ...paperDataRaw };
+
+      if (!newPaperRawData.deleted) {
+        newPaperRawData.deleted = {
+          color: 'SecondaryText',
+          papers: [],
+        }
+      }
+
+      newPaperRawData[category.toLowerCase()].papers.forEach((paper) => newPaperRawData.deleted.papers.push(paper));
+
+      delete newPaperRawData[category.toLowerCase()];
+
+      const newConfigFile = await updateConfigFile(newPaperRawData);
+      setPaperDataRaw(JSON.parse(newConfigFile as string));
+      setMode('list');
+
+      toast.style = Toast.Style.Success;
+      toast.title = 'Category deleted';
+    } catch(error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Oups.. An error occured, please try again";
+    }
+  }, [paperDataRaw])
 
   useEffect(() => {
     const getPaper = async () => {
@@ -192,4 +234,5 @@ export default function Command() {
     );
   if (mode === 'create-category') return <CreateCategory switchMode={switchMode} onSubmit={onSubmitCategory} />;
   if (mode === 'update-category') return <UpdateCategory categories={getCategories} switchMode={switchMode} onSubmit={onSubmitUpdateCategory}/>
+  if (mode === 'delete-category') return <DeleteCategory categories={getCategories} switchMode={switchMode} onSubmit={onSubmitDeleteCategory}/>
 }

@@ -75,6 +75,12 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
           onAction={() => switchMode("update-category")}
           icon={Icon.Switch}
         />
+        <Action
+          title="Delete Category"
+          shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
+          onAction={() => switchMode("delete-category")}
+          icon={Icon.Trash}
+        />
       </ActionPanel>
     );
   };

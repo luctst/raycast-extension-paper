@@ -47,11 +47,20 @@ export const UpdateCategory: FC<UpdateCategoryProps> = ({ categories, switchMode
         onAction={() => switchMode("create-category")}
         icon={Icon.NewDocument}
       />
+      <Action
+        title="Delete Category"
+        shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
+        onAction={() => switchMode("delete-category")}
+        icon={Icon.Trash}
+      />
     </ActionPanel>
   }>
     <Form.Dropdown id="category" autoFocus={true} throttle={true} title="Select category to update" value={category} onChange={setCategory}>
       {
-        categories.map((category, index) => <Form.Dropdown.Item value={category} title={category} key={index}/>)
+        categories.map((category, index) => {
+          if (category === 'Deleted') return null;
+          return <Form.Dropdown.Item value={category} title={category} key={index}/>
+        })
       }
     </Form.Dropdown>
     <Form.TextField id="newCategoryName" title="New category name" value={newCategoryName} onChange={setNewCategoryName} error={newCategoryNameError} onBlur={onBlurCategoryName}/>

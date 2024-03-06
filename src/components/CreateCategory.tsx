@@ -46,6 +46,12 @@ export const CreateCategory: FC<CreateCategoryProps> = ({ switchMode, onSubmit, 
             onAction={() => switchMode("update-category")}
             icon={Icon.Switch}
           />
+          <Action
+            title="Delete Category"
+            shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
+            onAction={() => switchMode("delete-category")}
+            icon={Icon.Trash}
+          />
         </ActionPanel>
       }
     >
