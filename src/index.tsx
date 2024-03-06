@@ -8,6 +8,7 @@ import { EditMode } from "./components/EditMode";
 import { CreateCategory } from './components/CreateCategory';
 import { encode } from "./utils/base64";
 import { updateConfigFile } from "./utils/updateConfigFile";
+import { UpdateCategory } from "./components/UpdateCategory";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -92,6 +93,12 @@ export default function Command() {
       title: 'Create new category..',
     });
 
+    if (getCategories.includes(values.category.charAt(0).toUpperCase() + values.category.slice(1))) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `${values.category} already exist`;
+      return;
+    }
+
     try {
       const newPaperRawData = { ...paperDataRaw };
 
@@ -110,7 +117,42 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Oups.. An error occured, please try again";
     }
-  }, [paperDataRaw]);
+  }, [paperDataRaw, getCategories]);
+
+  const onSubmitUpdateCategory = useCallback(async (categoryToUpdateDatas: CategoryToUpdate) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Update ${categoryToUpdateDatas.category} to -> ${categoryToUpdateDatas.newCategoryName}`,
+    });
+
+    if (getCategories.includes(categoryToUpdateDatas.newCategoryName.charAt(0).toUpperCase() + categoryToUpdateDatas.newCategoryName.slice(1))) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `${categoryToUpdateDatas.newCategoryName} already exist`;
+      return;
+    }
+
+    try {
+      const newPaperRawData = { ...paperDataRaw };
+
+      newPaperRawData[categoryToUpdateDatas.newCategoryName.toLowerCase()] = {
+        papers: [ ...newPaperRawData[categoryToUpdateDatas.category.toLowerCase()].papers],
+        color: categoryToUpdateDatas.color,
+      }
+
+      delete newPaperRawData[categoryToUpdateDatas.category.toLowerCase()];
+
+      const newConfigFile = await updateConfigFile(newPaperRawData);
+      setPaperDataRaw(JSON.parse(newConfigFile as string));
+      setMode('list');
+
+      toast.style = Toast.Style.Success;
+      toast.title = 'Category updated';
+    } catch(error) {
+      console.error(error);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Oups.. An error occured, please try again";
+    }
+  }, [paperDataRaw, getCategories]);
 
   useEffect(() => {
     const getPaper = async () => {
@@ -149,4 +191,5 @@ export default function Command() {
       />
     );
   if (mode === 'create-category') return <CreateCategory switchMode={switchMode} onSubmit={onSubmitCategory} />;
+  if (mode === 'update-category') return <UpdateCategory categories={getCategories} switchMode={switchMode} onSubmit={onSubmitUpdateCategory}/>
 }

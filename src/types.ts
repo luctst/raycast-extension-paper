@@ -34,6 +34,7 @@ export type PaperToRead = {
 
 export type CategoryToUpdate = {
   category: string;
+  newCategoryName: string;
   color: string;
 };
 

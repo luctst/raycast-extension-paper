@@ -48,32 +48,38 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
 
   const ListItemActions: FC<ListItemActionsProps> = ({ paper, category, index }) => {
     return (
-        <ActionPanel>
-          <Action
-            title="Read Paper"
-            autoFocus={true}
-            onAction={() => {
-              switchMode("read", { paper, category, index });
-            }}
-            icon={Icon.List}
-          />
-          <Action
-            title="Edit Paper"
-            onAction={() => switchMode("edit", { paper, category, index })}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-            icon={Icon.Pencil}
-          />
-          <Action
-            title="Create New Category"
-            shortcut={{ modifiers: ['cmd'], key: 'n' }}
-            onAction={() => switchMode("create-category")}
-            icon={Icon.NewDocument}
-          />
-        </ActionPanel>
+      <ActionPanel>
+        <Action
+          title="Read Paper"
+          autoFocus={true}
+          onAction={() => {
+            switchMode("read", { paper, category, index });
+          }}
+          icon={Icon.List}
+        />
+        <Action
+          title="Edit Paper"
+          onAction={() => switchMode("edit", { paper, category, index })}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          icon={Icon.Pencil}
+        />
+        <Action
+          title="Create New Category"
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onAction={() => switchMode("create-category")}
+          icon={Icon.NewDocument}
+        />
+        <Action
+          title="Update Category"
+          shortcut={{ modifiers: ["cmd"], key: "u" }}
+          onAction={() => switchMode("update-category")}
+          icon={Icon.Switch}
+        />
+      </ActionPanel>
     );
-  }
+  };
 
-  ListItemActions.displayName = 'ListItemActions';
+  ListItemActions.displayName = "ListItemActions";
 
   const ListToRender: FC = () => {
     if (!categoryActive || !paperDataRaw) return;
@@ -91,14 +97,14 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
                 { date: new Date(paper.createdAt), icon: Icon.Calendar },
               ]}
               icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[category].color] }}
-              actions={<ListItemActions  paper={paper} category={category} index={i}/>}
+              actions={<ListItemActions paper={paper} category={category} index={i} />}
             />
           ))}
         </List.Section>
       ));
     }
 
-    ListToRender.displayName = 'ListToRender';
+    ListToRender.displayName = "ListToRender";
 
     return (
       <List.Section title={categoryActive} subtitle={paperDataRaw[categoryActive].papers.length.toString()}>
@@ -111,7 +117,7 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
               { text: { value: paper.description || "", color: Color[paperDataRaw[categoryActive].color] } },
               { date: new Date(paper.createdAt), icon: Icon.Calendar },
             ]}
-            actions={<ListItemActions paper={paper} category={categoryActive} index={p}/>}
+            actions={<ListItemActions paper={paper} category={categoryActive} index={p} />}
           />
         ))}
       </List.Section>

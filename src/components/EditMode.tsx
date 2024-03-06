@@ -79,6 +79,12 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
             onAction={() => switchMode('create-category')}
             icon={Icon.NewDocument}
           />
+          <Action
+            title="Update Category"
+            shortcut={{ modifiers: ["cmd"], key: "u" }}
+            onAction={() => switchMode("update-category")}
+            icon={Icon.Switch}
+          />
         </ActionPanel>
       }
     >

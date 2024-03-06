@@ -40,6 +40,12 @@ export const CreateCategory: FC<CreateCategoryProps> = ({ switchMode, onSubmit, 
             onAction={() => switchMode('list')}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           />
+          <Action
+            title="Update Category"
+            shortcut={{ modifiers: ["cmd"], key: "u" }}
+            onAction={() => switchMode("update-category")}
+            icon={Icon.Switch}
+          />
         </ActionPanel>
       }
     >
