@@ -22,6 +22,12 @@ export const ReadMode: FC<ReadModeProps> = memo(function ReadMode({ paperDatas, 
     <Detail isLoading={isLoading} markdown={markdown} navigationTitle={paperDatas.paper.name} actions={
       <ActionPanel>
         <Action title='List All Your Papers' autoFocus={true} onAction={() => { switchMode('list', paperDatas) }} icon={Icon.List}/>
+        <Action
+          title="Create Paper"
+          onAction={() => switchMode('create-paper')}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          icon={Icon.Plus}
+        />
         <Action title='Edit Paper' onAction={() => switchMode('edit', paperDatas)} shortcut={{ modifiers: ['cmd'], key: 'e', }} icon={Icon.Pencil}/>
         <Action
           title="Create New Category"

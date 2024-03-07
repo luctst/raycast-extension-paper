@@ -59,6 +59,12 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
           icon={Icon.List}
         />
         <Action
+          title="Create Paper"
+          onAction={() => switchMode('create-paper')}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          icon={Icon.Plus}
+        />
+        <Action
           title="Edit Paper"
           onAction={() => switchMode("edit", { paper, category, index })}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
@@ -100,22 +106,26 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
     if (categoryActive === "all") {
       const categories = Object.keys(paperDataRaw);
 
-      return categories.map((category, y) => (
-        <List.Section title={category} subtitle={paperDataRaw[category].papers.length.toString()} key={y}>
-          {paperDataRaw[category].papers.map((paper, i) => (
-            <List.Item
-              key={i}
-              title={paper.name}
-              accessories={[
-                { text: { value: paper.description || "", color: Color[paperDataRaw[category].color] } },
-                { date: new Date(paper.createdAt), icon: Icon.Calendar },
-              ]}
-              icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[category].color] }}
-              actions={<ListItemActions paper={paper} category={category} index={i} />}
-            />
-          ))}
-        </List.Section>
-      ));
+      return categories.map((category, y) => {
+        if (category === 'deleted') return null;
+
+        return (
+          <List.Section title={category} subtitle={paperDataRaw[category].papers.length.toString()} key={y}>
+            {paperDataRaw[category].papers.map((paper, i) => (
+              <List.Item
+                key={i}
+                title={paper.name}
+                accessories={[
+                  { text: { value: paper.description || "", color: Color[paperDataRaw[category].color] } },
+                  { date: new Date(paper.createdAt), icon: Icon.Calendar },
+                ]}
+                icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[category].color] }}
+                actions={<ListItemActions paper={paper} category={category} index={i} />}
+              />
+            ))}
+          </List.Section>
+        );
+      });
     }
 
     ListToRender.displayName = "ListToRender";

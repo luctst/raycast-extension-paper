@@ -11,7 +11,7 @@ export type ArbitraryObject = { [key: string]: unknown; };
 
 type Opaque<T, K extends string> = T & { __typename: K }
 
-type Base64 = Opaque<string, "base64">
+export type Base64 = Opaque<string, "base64">
 
 export type Paper = {
   name: string;

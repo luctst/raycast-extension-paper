@@ -5,7 +5,7 @@ import { SwitchMode } from "../types";
 type DeleteCategoryProps = {
   switchMode: SwitchMode;
   categories: Array<string>;
-  onSubmit: (category: string) => void;
+  onSubmit: (values: { category: string }) => void;
 };
 
 export const DeleteCategory: FC<DeleteCategoryProps> = ({ switchMode, categories, onSubmit }) => {
@@ -21,6 +21,12 @@ export const DeleteCategory: FC<DeleteCategoryProps> = ({ switchMode, categories
           icon={Icon.List}
           onAction={() => switchMode('list')}
           shortcut={{ modifiers: ["cmd"], key: "l" }}
+        />
+        <Action
+          title="Create Paper"
+          onAction={() => switchMode('create-paper')}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          icon={Icon.Plus}
         />
         <Action
           title="Create New Category"

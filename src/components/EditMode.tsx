@@ -49,7 +49,7 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
     }
 
     if (createdAtError === undefined) return;
-    setCreatedAtError('Enter Date');
+    setCreatedAtError(undefined);
   };
 
   useEffect(() => {
@@ -72,6 +72,12 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
             shortcut={
               { modifiers: ['cmd'], key: 'l' }
             }
+          />
+          <Action
+            title="Create Paper"
+            onAction={() => switchMode('create-paper')}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            icon={Icon.Plus}
           />
           <Action
             title="Create New Category"
