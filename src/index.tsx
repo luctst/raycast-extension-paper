@@ -5,7 +5,7 @@ import { Mode, SwitchMode, PaperDataSwitchMode, PaperRawData, Paper, CategoryToU
 import { ListMode } from "./components/ListMode";
 import { ReadMode } from "./components/ReadMode";
 import { EditMode } from "./components/EditMode";
-import { CreateCategory } from './components/CreateCategory';
+import { CreateCategory } from "./components/CreateCategory";
 import { encode } from "./utils/base64";
 import { updateConfigFile } from "./utils/updateConfigFile";
 import { UpdateCategory } from "./components/UpdateCategory";
@@ -58,10 +58,10 @@ export default function Command() {
           const newConfigFile = await updateConfigFile(newPaperRawData);
 
           setPaperDataRaw(JSON.parse(newConfigFile as string));
-          setMode('list');
+          setMode("list");
 
           toast.style = Toast.Style.Success;
-          toast.title = 'Success';
+          toast.title = "Success";
 
           return;
         }
@@ -71,10 +71,10 @@ export default function Command() {
         const newConfigFile = await updateConfigFile(newPaperRawData);
 
         setPaperDataRaw(JSON.parse(newConfigFile as string));
-        setMode('list');
+        setMode("list");
 
         toast.style = Toast.Style.Success;
-        toast.title = 'Success';
+        toast.title = "Success";
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Oups.. An error occured, please try again";
@@ -83,181 +83,205 @@ export default function Command() {
     [paperDataRaw],
   );
 
-  const onSubmitCategory = useCallback(async (values: CategoryToUpdate) => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: 'Create new category..',
-    });
+  const onSubmitCategory = useCallback(
+    async (values: CategoryToUpdate) => {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Create new category..",
+      });
 
-    if (values.category.toLowerCase().trim() === 'deleted') {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Deleted is a special category which is created when you delete papers or category`;
-      return;
-    }
-
-    if (getCategories.includes(values.category.charAt(0).toUpperCase() + values.category.slice(1))) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `${values.category} already exist`;
-      return;
-    }
-
-    try {
-      const newPaperRawData = { ...paperDataRaw };
-
-      newPaperRawData[values.category.toLowerCase()] = {
-        color: values.color,
-        papers: []
+      if (values.category.toLowerCase().trim() === "deleted") {
+        toast.style = Toast.Style.Failure;
+        toast.title = `Deleted is a special category which is created when you delete papers or category`;
+        return;
       }
 
-      const newConfigFile = await updateConfigFile(newPaperRawData);
-      setPaperDataRaw(JSON.parse(newConfigFile as string));
-      setMode('list');
-
-      toast.style = Toast.Style.Success;
-      toast.title = 'New Category Created';
-    } catch(error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Oups.. An error occured, please try again";
-    }
-  }, [paperDataRaw, getCategories]);
-
-  const onSubmitUpdateCategory = useCallback(async (categoryToUpdateDatas: CategoryToUpdate) => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Update ${categoryToUpdateDatas.category} to -> ${categoryToUpdateDatas.newCategoryName}`,
-    });
-
-    if (getCategories.includes(categoryToUpdateDatas.newCategoryName.charAt(0).toUpperCase() + categoryToUpdateDatas.newCategoryName.slice(1))) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `${categoryToUpdateDatas.newCategoryName} already exist`;
-      return;
-    }
-
-    try {
-      const newPaperRawData = { ...paperDataRaw };
-
-      newPaperRawData[categoryToUpdateDatas.newCategoryName.toLowerCase()] = {
-        papers: [ ...newPaperRawData[categoryToUpdateDatas.category.toLowerCase()].papers],
-        color: categoryToUpdateDatas.color,
+      if (getCategories.includes(values.category.charAt(0).toUpperCase() + values.category.slice(1))) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `${values.category} already exist`;
+        return;
       }
 
-      delete newPaperRawData[categoryToUpdateDatas.category.toLowerCase()];
+      try {
+        const newPaperRawData = { ...paperDataRaw };
 
-      const newConfigFile = await updateConfigFile(newPaperRawData);
-      setPaperDataRaw(JSON.parse(newConfigFile as string));
-      setMode('list');
-
-      toast.style = Toast.Style.Success;
-      toast.title = 'Category updated';
-    } catch(error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Oups.. An error occured, please try again";
-    }
-  }, [paperDataRaw, getCategories]);
-
-  const onSubmitDeleteCategory = useCallback(async ({ category }: { category: string }) => {
-    const userWanteDelete = await confirmAlert({ title: `Delete ${category} ?`, message: 'Are you sur to delete this category all papers related to will be moved in the deleted category', primaryAction: { style: Alert.ActionStyle.Destructive, title: 'Delete' }});
-
-    if (userWanteDelete === false) return;
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Delete ${category} Category`,
-    });
-
-    try {
-      const newPaperRawData = { ...paperDataRaw };
-
-      if (!newPaperRawData.deleted) {
-        newPaperRawData.deleted = {
-          color: 'SecondaryText',
+        newPaperRawData[values.category.toLowerCase()] = {
+          color: values.color,
           papers: [],
-        }
+        };
+
+        const newConfigFile = await updateConfigFile(newPaperRawData);
+        setPaperDataRaw(JSON.parse(newConfigFile as string));
+        setMode("list");
+
+        toast.style = Toast.Style.Success;
+        toast.title = "New Category Created";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Oups.. An error occured, please try again";
+      }
+    },
+    [paperDataRaw, getCategories],
+  );
+
+  const onSubmitUpdateCategory = useCallback(
+    async (categoryToUpdateDatas: CategoryToUpdate) => {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Update ${categoryToUpdateDatas.category} to -> ${categoryToUpdateDatas.newCategoryName}`,
+      });
+
+      if (
+        getCategories.includes(
+          categoryToUpdateDatas.newCategoryName.charAt(0).toUpperCase() +
+            categoryToUpdateDatas.newCategoryName.slice(1),
+        )
+      ) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `${categoryToUpdateDatas.newCategoryName} already exist`;
+        return;
       }
 
-      newPaperRawData[category.toLowerCase()].papers.forEach((paper) => newPaperRawData.deleted.papers.push(paper));
+      try {
+        const newPaperRawData = { ...paperDataRaw };
 
-      delete newPaperRawData[category.toLowerCase()];
+        newPaperRawData[categoryToUpdateDatas.newCategoryName.toLowerCase()] = {
+          papers: [...newPaperRawData[categoryToUpdateDatas.category.toLowerCase()].papers],
+          color: categoryToUpdateDatas.color,
+        };
 
-      const newConfigFile = await updateConfigFile(newPaperRawData);
-      setPaperDataRaw(JSON.parse(newConfigFile as string));
-      setMode('list');
+        delete newPaperRawData[categoryToUpdateDatas.category.toLowerCase()];
 
-      toast.style = Toast.Style.Success;
-      toast.title = 'Category deleted';
-    } catch(error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Oups.. An error occured, please try again";
-    }
-  }, [paperDataRaw])
+        const newConfigFile = await updateConfigFile(newPaperRawData);
+        setPaperDataRaw(JSON.parse(newConfigFile as string));
+        setMode("list");
 
-  const onActionDeletePaper = useCallback(async (category: string, index: number) => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Delete Paper`,
-    });
+        toast.style = Toast.Style.Success;
+        toast.title = "Category updated";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Oups.. An error occured, please try again";
+      }
+    },
+    [paperDataRaw, getCategories],
+  );
 
-    if (category === 'deleted') {
-      toast.style = Toast.Style.Failure;
-      toast.title = 'Paper already deleted';
-      return;
-    };
+  const onSubmitDeleteCategory = useCallback(
+    async ({ category }: { category: string }) => {
+      const userWanteDelete = await confirmAlert({
+        title: `Delete ${category} ?`,
+        message: "Are you sur to delete this category all papers related to will be moved in the deleted category",
+        primaryAction: { style: Alert.ActionStyle.Destructive, title: "Delete" },
+      });
 
-    try {
-      const newPaperRawData = { ...paperDataRaw };
-      const paper = newPaperRawData[category].papers[index];
+      if (userWanteDelete === false) return;
 
-      newPaperRawData[category].papers.splice(index, 1);
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Delete ${category} Category`,
+      });
 
-      if (!newPaperRawData.deleted) {
-        newPaperRawData.deleted = {
-          color: 'SecondaryText',
-          papers: []
+      try {
+        const newPaperRawData = { ...paperDataRaw };
+
+        if (!newPaperRawData.deleted) {
+          newPaperRawData.deleted = {
+            color: "SecondaryText",
+            papers: [],
+          };
         }
+
+        newPaperRawData[category.toLowerCase()].papers.forEach((paper) => newPaperRawData.deleted.papers.push(paper));
+
+        delete newPaperRawData[category.toLowerCase()];
+
+        const newConfigFile = await updateConfigFile(newPaperRawData);
+        setPaperDataRaw(JSON.parse(newConfigFile as string));
+        setMode("list");
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Category deleted";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Oups.. An error occured, please try again";
+      }
+    },
+    [paperDataRaw],
+  );
+
+  const onActionDeletePaper = useCallback(
+    async (category: string, index: number) => {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Delete Paper`,
+      });
+
+      if (category === "deleted") {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Paper already deleted";
+        return;
       }
 
-      newPaperRawData.deleted.papers.push(paper);
+      try {
+        const newPaperRawData = { ...paperDataRaw };
+        const paper = newPaperRawData[category].papers[index];
 
-      const newConfigFile = await updateConfigFile(newPaperRawData);
-      setPaperDataRaw(JSON.parse(newConfigFile as string));
-      setMode('list');
+        newPaperRawData[category].papers.splice(index, 1);
 
-      toast.style = Toast.Style.Success;
-      toast.title = 'Paper Deleted';
-    } catch(error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Oups.. An error occured, please try again";
-    }
-  }, [paperDataRaw])
+        if (!newPaperRawData.deleted) {
+          newPaperRawData.deleted = {
+            color: "SecondaryText",
+            papers: [],
+          };
+        }
 
-  const onSubmitCreatePaper = useCallback(async (newPaperData: Paper & { category: string }) => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: 'Adding new paper',
-    });
+        newPaperRawData.deleted.papers.push(paper);
 
-    try {
-      const newPaperRawData = { ...paperDataRaw };
-      const newPaper = {
-        name: newPaperData.name,
-        description: newPaperData.description || '',
-        content: encode(newPaperData.content) as Base64,
-        createdAt: new Date(newPaperData.createdAt).getTime(),
-      };
+        const newConfigFile = await updateConfigFile(newPaperRawData);
+        setPaperDataRaw(JSON.parse(newConfigFile as string));
+        setMode("list");
 
-      newPaperRawData[newPaperData.category].papers.push({ ...newPaper });
+        toast.style = Toast.Style.Success;
+        toast.title = "Paper Deleted";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Oups.. An error occured, please try again";
+      }
+    },
+    [paperDataRaw],
+  );
 
-      const newConfigFile = await updateConfigFile(newPaperRawData);
-      setPaperDataRaw(JSON.parse(newConfigFile as string));
-      setMode('list');
+  const onSubmitCreatePaper = useCallback(
+    async (newPaperData: Paper & { category: string }) => {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Adding new paper",
+      });
 
-      toast.style = Toast.Style.Success;
-      toast.title = 'Paper Created';
-    } catch(error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Oups.. An error occured, please try again";
-    }
-  }, [paperDataRaw])
+      try {
+        const newPaperRawData = { ...paperDataRaw };
+        const newPaper = {
+          name: newPaperData.name,
+          description: newPaperData.description || "",
+          content: encode(newPaperData.content) as Base64,
+          createdAt: new Date(newPaperData.createdAt).getTime(),
+        };
+
+        newPaperRawData[newPaperData.category].papers.push({ ...newPaper });
+
+        const newConfigFile = await updateConfigFile(newPaperRawData);
+        setPaperDataRaw(JSON.parse(newConfigFile as string));
+        setMode("list");
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Paper Created";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Oups.. An error occured, please try again";
+      }
+    },
+    [paperDataRaw],
+  );
 
   useEffect(() => {
     const getPaper = async () => {
@@ -283,9 +307,22 @@ export default function Command() {
 
   if (mode === "list")
     return (
-      <ListMode isLoading={isLoading} paperDataRaw={paperDataRaw} switchMode={switchMode} categories={getCategories} onActionDeletePaper={onActionDeletePaper}/>
+      <ListMode
+        isLoading={isLoading}
+        paperDataRaw={paperDataRaw}
+        switchMode={switchMode}
+        categories={getCategories}
+        onActionDeletePaper={onActionDeletePaper}
+      />
     );
-  if (mode === "read") return <ReadMode paperDatas={paperToRead as PaperDataSwitchMode} switchMode={switchMode} onActionDeletePaper={onActionDeletePaper} />;
+  if (mode === "read")
+    return (
+      <ReadMode
+        paperDatas={paperToRead as PaperDataSwitchMode}
+        switchMode={switchMode}
+        onActionDeletePaper={onActionDeletePaper}
+      />
+    );
   if (mode === "edit")
     return (
       <EditMode
@@ -295,8 +332,11 @@ export default function Command() {
         onSubmit={onSubmit}
       />
     );
-  if (mode === 'create-category') return <CreateCategory switchMode={switchMode} onSubmit={onSubmitCategory} />;
-  if (mode === 'update-category') return <UpdateCategory categories={getCategories} switchMode={switchMode} onSubmit={onSubmitUpdateCategory}/>
-  if (mode === 'delete-category') return <DeleteCategory categories={getCategories} switchMode={switchMode} onSubmit={onSubmitDeleteCategory}/>
-  if (mode === 'create-paper') return <CreatePaper categories={getCategories} switchMode={switchMode} onSubmit={onSubmitCreatePaper}/>;
+  if (mode === "create-category") return <CreateCategory switchMode={switchMode} onSubmit={onSubmitCategory} />;
+  if (mode === "update-category")
+    return <UpdateCategory categories={getCategories} switchMode={switchMode} onSubmit={onSubmitUpdateCategory} />;
+  if (mode === "delete-category")
+    return <DeleteCategory categories={getCategories} switchMode={switchMode} onSubmit={onSubmitDeleteCategory} />;
+  if (mode === "create-paper")
+    return <CreatePaper categories={getCategories} switchMode={switchMode} onSubmit={onSubmitCreatePaper} />;
 }

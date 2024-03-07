@@ -40,7 +40,13 @@ const PaperSearchBarDropdown: FC<PaperSearchBarDropdownProps> = ({ onChange, isL
   );
 };
 
-export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw, isLoading, switchMode, categories, onActionDeletePaper }) {
+export const ListMode: FC<ListModeProps> = memo(function ListMode({
+  paperDataRaw,
+  isLoading,
+  switchMode,
+  categories,
+  onActionDeletePaper,
+}) {
   const [categoryActive, setCategoryActive] = useState<string>();
 
   const onChange = (value: string) => {
@@ -60,7 +66,7 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
         />
         <Action
           title="Create Paper"
-          onAction={() => switchMode('create-paper')}
+          onAction={() => switchMode("create-paper")}
           shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
           icon={Icon.Plus}
         />
@@ -84,13 +90,13 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
         />
         <Action
           title="Delete Category"
-          shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
           onAction={() => switchMode("delete-category")}
           icon={Icon.Trash}
         />
         <Action
           title="Delete Paper"
-          shortcut={{ modifiers: ['cmd'], key: 'deleteForward' }}
+          shortcut={{ modifiers: ["cmd"], key: "deleteForward" }}
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           onAction={() => onActionDeletePaper(category, index)}
@@ -107,7 +113,7 @@ export const ListMode: FC<ListModeProps> = memo(function ListMode({ paperDataRaw
       const categories = Object.keys(paperDataRaw);
 
       return categories.map((category, y) => {
-        if (category === 'deleted') return null;
+        if (category === "deleted") return null;
 
         return (
           <List.Section title={category} subtitle={paperDataRaw[category].papers.length.toString()} key={y}>

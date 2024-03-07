@@ -2,7 +2,7 @@ import { ActionPanel, Form, Action, Icon } from "@raycast/api";
 import { FC, useState } from "react";
 import { SwitchMode, Paper } from "../types";
 
-type NewPaper = Paper & { category: string; };
+type NewPaper = Paper & { category: string };
 
 type CreatePaperProps = {
   categories: Array<string>;
@@ -27,7 +27,7 @@ export const CreatePaper: FC<CreatePaperProps> = ({ categories, switchMode, onSu
     if (event.target.value.length <= 0) {
       if (nameError) return;
 
-      setNameError('Enter name');
+      setNameError("Enter name");
       return;
     }
 
@@ -39,7 +39,7 @@ export const CreatePaper: FC<CreatePaperProps> = ({ categories, switchMode, onSu
     if (event.target.value === null) {
       if (createdAtError) return;
 
-      setCreatedAtError('Enter date');
+      setCreatedAtError("Enter date");
       return;
     }
 
@@ -48,52 +48,73 @@ export const CreatePaper: FC<CreatePaperProps> = ({ categories, switchMode, onSu
   };
 
   return (
-    <Form actions={
-      <ActionPanel>
-        <Action.SubmitForm title="Submit" onSubmit={onSubmit} icon={Icon.Redo}/>
-        <Action
-          title="Go Back To List Mode"
-          autoFocus={true}
-          icon={Icon.List}
-          onAction={() => switchMode("list")}
-          shortcut={
-            { modifiers: ['cmd'], key: 'l' }
-          }
-        />
-        <Action
-          title="Create New Category"
-          shortcut={{ modifiers: ['cmd'], key: 'n' }}
-          onAction={() => switchMode('create-category')}
-          icon={Icon.NewDocument}
-        />
-        <Action
-          title="Update Category"
-          shortcut={{ modifiers: ["cmd"], key: "u" }}
-          onAction={() => switchMode("update-category")}
-          icon={Icon.Switch}
-        />
-        <Action
-          title="Delete Category"
-          shortcut={{ modifiers: ["cmd", 'shift'], key: 'delete' }}
-          onAction={() => switchMode("delete-category")}
-          icon={Icon.Trash}
-        />
-      </ActionPanel>
-    } navigationTitle="Create paper">
-      <Form.TextField id="name" value={name} onChange={setName} title="Name of your paper" error={nameError} onBlur={onBlurName}/>
-      <Form.DatePicker id="createdAt" value={createdAt} onChange={setCreatedAt} title="Created at" type={Form.DatePicker.Date} error={createdAtError} onBlur={onBlurCreatedAt}/>
-      <Form.TextArea id="content" value={content} title="Content" onChange={setContent} enableMarkdown={true}/>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit" onSubmit={onSubmit} icon={Icon.Redo} />
+          <Action
+            title="Go Back To List Mode"
+            autoFocus={true}
+            icon={Icon.List}
+            onAction={() => switchMode("list")}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+          />
+          <Action
+            title="Create New Category"
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            onAction={() => switchMode("create-category")}
+            icon={Icon.NewDocument}
+          />
+          <Action
+            title="Update Category"
+            shortcut={{ modifiers: ["cmd"], key: "u" }}
+            onAction={() => switchMode("update-category")}
+            icon={Icon.Switch}
+          />
+          <Action
+            title="Delete Category"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+            onAction={() => switchMode("delete-category")}
+            icon={Icon.Trash}
+          />
+        </ActionPanel>
+      }
+      navigationTitle="Create paper"
+    >
+      <Form.TextField
+        id="name"
+        value={name}
+        onChange={setName}
+        title="Name of your paper"
+        error={nameError}
+        onBlur={onBlurName}
+      />
+      <Form.DatePicker
+        id="createdAt"
+        value={createdAt}
+        onChange={setCreatedAt}
+        title="Created at"
+        type={Form.DatePicker.Date}
+        error={createdAtError}
+        onBlur={onBlurCreatedAt}
+      />
+      <Form.TextArea id="content" value={content} title="Content" onChange={setContent} enableMarkdown={true} />
       <Form.Dropdown id="category" title="Category" value={category} onChange={setCategory} throttle={true}>
-        {
-          categories.map((category, index) => {
-            if (category === 'Deleted') return null;
-            return <Form.Dropdown.Item title={category} value={category.toLowerCase()} key={index} />
-          })
-        }
+        {categories.map((category, index) => {
+          if (category === "Deleted") return null;
+          return <Form.Dropdown.Item title={category} value={category.toLowerCase()} key={index} />;
+        })}
       </Form.Dropdown>
-      <Form.TextField id="description" placeholder="Enter a description" info="Optional field" value={description} onChange={setDescription} title="Description"/>
+      <Form.TextField
+        id="description"
+        placeholder="Enter a description"
+        info="Optional field"
+        value={description}
+        onChange={setDescription}
+        title="Description"
+      />
     </Form>
   );
 };
 
-CreatePaper.displayName = 'CreatePaper';
+CreatePaper.displayName = "CreatePaper";

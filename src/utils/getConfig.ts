@@ -1,8 +1,8 @@
-import { environment } from '@raycast/api';
-import { readFile, readdir } from 'fs/promises';
-import { createWriteStream } from 'fs';
-import { ErrnoException } from '../types';
-import initFile from '../templates/init.json';
+import { environment } from "@raycast/api";
+import { readFile, readdir } from "fs/promises";
+import { createWriteStream } from "fs";
+import { ErrnoException } from "../types";
+import initFile from "../templates/init.json";
 
 export async function getConfig(): Promise<string | ErrnoException | Error> {
   try {
@@ -14,17 +14,17 @@ export async function getConfig(): Promise<string | ErrnoException | Error> {
         const ws = createWriteStream(configfilePath);
         ws.write(JSON.stringify(initFile));
         ws.end();
-        ws.on('finish', () => {
+        ws.on("finish", () => {
           readFile(configfilePath)
-            .then(res => resolve(res.toString('utf-8')))
-            .catch(err => reject(err))
-        })
-      })
+            .then((res) => resolve(res.toString("utf-8")))
+            .catch((err) => reject(err));
+        });
+      });
     }
 
     const paper = await readFile(configfilePath);
-    return paper.toString('utf-8');
-  } catch(error: ErrnoException | Error | unknown) {
+    return paper.toString("utf-8");
+  } catch (error: ErrnoException | Error | unknown) {
     return error as Error;
   }
-};
+}
