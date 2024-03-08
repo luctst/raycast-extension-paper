@@ -1,14 +1,15 @@
-import { ActionPanel, Action, Form, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api";
 import { FC, useState, useRef } from "react";
-import { CategoryToUpdate, SwitchMode } from "../types";
+import { useGetConfig } from "../hooks/useGetConfig";
+import { useGetCategories } from "../hooks/useGetCategories";
+import { updateConfigFile } from "../utils/updateConfigFile";
+import { ListMode } from "./ListMode";
 
-type UpdateCategoryProps = {
-  categories: Array<string>;
-  switchMode: SwitchMode;
-  onSubmit: (categoryToUpdateData: CategoryToUpdate) => void;
-};
+export const UpdateCategory: FC = () => {
+  const { isLoading, paperDataRaw } = useGetConfig();
+  const categories = useGetCategories(paperDataRaw);
+  const { push } = useNavigation();
 
-export const UpdateCategory: FC<UpdateCategoryProps> = ({ categories, switchMode, onSubmit }) => {
   const [category, setCategory] = useState<string>();
 
   const [newCategoryName, setNewCategoryName] = useState<string>();
@@ -30,34 +31,62 @@ export const UpdateCategory: FC<UpdateCategoryProps> = ({ categories, switchMode
     setNewCategoryNameError(undefined);
   };
 
+  const onSubmit = async (formValues: { category: string; newCategoryName: string; color: Color.ColorLike }) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Update ${formValues.category} to -> ${formValues.newCategoryName}`,
+    });
+
+    try {
+      if (
+        formValues.newCategoryName.includes(' ') ||
+        formValues.newCategoryName.includes('-') ||
+        formValues.newCategoryName.includes('_')
+      ) {
+        throw new Error('Error value - Do not use spaces or dash and lower dash')
+      }
+
+      const categoriesLowerCase = categories.map((category) => category.toLowerCase());
+
+      if (categoriesLowerCase.includes(formValues.newCategoryName.toLowerCase().trim())) {
+        throw new Error(`The ${formValues.newCategoryName} category already exist`);
+      }
+
+      const newPaperRawData = { ...paperDataRaw };
+
+      newPaperRawData[formValues.newCategoryName.toLowerCase()] = {
+      papers: [...newPaperRawData[formValues.category.toLowerCase()].papers],
+      color: formValues.color,
+    };
+
+    delete newPaperRawData[formValues.category.toLowerCase()];
+
+    await updateConfigFile(newPaperRawData);
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Category updated";
+    push(<ListMode />);
+    } catch(error: Error | unknown) {
+      toast.style = Toast.Style.Failure;
+
+      if (error instanceof Error) {
+       toast.title = error.message;
+       return;
+      }
+
+      toast.title = 'Oups... An error occured, please try again';
+    }
+  };
+
   return (
     <Form
+      isLoading={isLoading}
       navigationTitle="Update Category"
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Redo} title="Update Catagory" onSubmit={onSubmit} />
-          <Action
-            title="Go Back To List Mode"
-            autoFocus={true}
-            icon={Icon.List}
-            onAction={() => switchMode("list")}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-          <Action
-            title="Create New Category"
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => switchMode("create-category")}
-            icon={Icon.NewDocument}
-          />
-          <Action
-            title="Delete Category"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-            onAction={() => switchMode("delete-category")}
-            icon={Icon.Trash}
-          />
+          <Action.SubmitForm title="Update category" onSubmit={onSubmit}/>
         </ActionPanel>
-      }
-    >
+      }>
       <Form.Dropdown
         id="category"
         autoFocus={true}

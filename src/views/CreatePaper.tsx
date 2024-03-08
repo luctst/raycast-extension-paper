@@ -1,16 +1,17 @@
-import { ActionPanel, Form, Action, Icon } from "@raycast/api";
+import { ActionPanel, Form, Action, Toast, showToast, useNavigation } from "@raycast/api";
 import { FC, useState } from "react";
-import { SwitchMode, Paper } from "../types";
+import { Paper, Base64 } from "../types";
+import { useGetConfig } from "../hooks/useGetConfig";
+import { useGetCategories } from "../hooks/useGetCategories";
+import { encode } from '../utils/base64';
+import { updateConfigFile } from "../utils/updateConfigFile";
+import { ListMode } from "./ListMode";
 
-type NewPaper = Paper & { category: string };
+export const CreatePaper: FC = () => {
+  const { isLoading, paperDataRaw } = useGetConfig();
+  const categories = useGetCategories(paperDataRaw);
+  const { push } = useNavigation();
 
-type CreatePaperProps = {
-  categories: Array<string>;
-  switchMode: SwitchMode;
-  onSubmit: (values: NewPaper) => void;
-};
-
-export const CreatePaper: FC<CreatePaperProps> = ({ categories, switchMode, onSubmit }) => {
   const [name, setName] = useState<string>();
   const [nameError, setNameError] = useState<string | undefined>();
 
@@ -47,39 +48,44 @@ export const CreatePaper: FC<CreatePaperProps> = ({ categories, switchMode, onSu
     setCreatedAtError(undefined);
   };
 
+  const onSubmit = async (formValues: Paper & { category: string }) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Adding new paper",
+    });
+
+    try {
+      const newPaperRawData = { ...paperDataRaw };
+      const newPaper = {
+        name: formValues.name,
+        description: formValues.description || "",
+        content: encode(formValues.content) as Base64,
+        createdAt: new Date(formValues.createdAt).getTime(),
+      };
+
+      newPaperRawData[formValues.category.toLowerCase()].papers.push({ ...newPaper });
+
+      await updateConfigFile(newPaperRawData);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Paper Created";
+
+      push(<ListMode />);
+    } catch(error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Oups.. An error occured, please try again";
+    }
+  }
+
   return (
     <Form
+      navigationTitle="Create paper"
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={onSubmit} icon={Icon.Redo} />
-          <Action
-            title="Go Back To List Mode"
-            autoFocus={true}
-            icon={Icon.List}
-            onAction={() => switchMode("list")}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-          <Action
-            title="Create New Category"
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => switchMode("create-category")}
-            icon={Icon.NewDocument}
-          />
-          <Action
-            title="Update Category"
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
-            onAction={() => switchMode("update-category")}
-            icon={Icon.Switch}
-          />
-          <Action
-            title="Delete Category"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-            onAction={() => switchMode("delete-category")}
-            icon={Icon.Trash}
-          />
+          <Action.SubmitForm title="Create paper" onSubmit={onSubmit} />
         </ActionPanel>
       }
-      navigationTitle="Create paper"
     >
       <Form.TextField
         id="name"

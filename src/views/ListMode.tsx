@@ -1,9 +1,10 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon, Color, ActionPanel, Action, useNavigation } from "@raycast/api";
 import { FC, useState } from "react";
 import { PaperRawData } from "../types";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
 import { Actions } from "../components/Actions";
+import { CreatePaper } from "./CreatePaper";
 
 type Categories = Array<string>;
 
@@ -58,7 +59,7 @@ const ListWrapperItem: FC<ListWrapperItemProps> = ({ category, paperDataRaw }) =
           ]}
           // @ts-ignore
           icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[category].color] }}
-          actions={<Actions mode="list" paper={paper}/>}
+          actions={<Actions mode="list" paper={paper} category={category} index={i} />}
         />
       ))}
     </List.Section>
@@ -84,6 +85,7 @@ export const ListMode: FC = () => {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
   const [ categoryActive, setCategoryActive] = useState<string>('all');
+  const { push } = useNavigation();
 
   const onChange = (value: string) => {
     setCategoryActive(value);
@@ -94,7 +96,11 @@ export const ListMode: FC = () => {
       searchBarPlaceholder={isLoading ? "Fetching Papers.." : "Search Paper"}
       isLoading={isLoading}
       searchBarAccessory={<PaperSearchBarDropdown categories={categories} isLoading={isLoading} onChange={onChange}/>}
-      throttle={true}>
+      throttle={true} actions={
+        <ActionPanel>
+          <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)}/>
+        </ActionPanel>
+      }>
       <ListWrapper categories={categories} categoryActive={categoryActive} papersData={paperDataRaw} />
     </List>
   );

@@ -1,31 +1,35 @@
-import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { FC, memo, useEffect, useState } from "react";
-import { Paper, PaperDataSwitchMode, SwitchMode } from "../types";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { FC, useEffect, useState } from "react";
+import { Base64, Paper } from "../types";
 import { decode } from "../utils/base64";
+import { useGetConfig } from "../hooks/useGetConfig";
+import { useGetCategories } from "../hooks/useGetCategories";
+import { encode } from '../utils/base64';
+import { updateConfigFile } from "../utils/updateConfigFile";
+import { ListMode } from "./ListMode";
 
 type EditModeProps = {
-  paperDatas: PaperDataSwitchMode;
-  switchMode: SwitchMode;
-  categories: Array<string>;
-  onSubmit: (paperData: Paper & { category: string }, oldCategory: string, index: number) => void;
+  paper: Paper;
+  paperCategory: string;
+  index: number;
 };
 
-export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, switchMode, categories, onSubmit }) {
-  const defaultValues = paperDatas.paper;
+export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => {
+  const { isLoading, paperDataRaw } = useGetConfig();
+  const categories = useGetCategories(paperDataRaw);
+  const { push } = useNavigation();
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const [name, setName] = useState<string>(defaultValues.name || "");
+  const [name, setName] = useState<string>(paper.name || "");
   const [nameError, setNameError] = useState<string | undefined>();
 
-  const [createdAt, setCreatedAt] = useState<Date | null>(new Date(defaultValues.createdAt) || "");
+  const [createdAt, setCreatedAt] = useState<Date | null>(new Date(paper.createdAt) || "");
   const [createdAtError, setCreatedAtError] = useState<string | undefined>();
 
-  const [content, setContent] = useState<string>(defaultValues.content || "");
+  const [content, setContent] = useState<string>(paper.content || "");
 
-  const [category, setCategory] = useState<string>(paperDatas.category || "");
+  const [category, setCategory] = useState<string>(paperCategory || "");
 
-  const [description, setDescription] = useState<string>(defaultValues.description || "");
+  const [description, setDescription] = useState<string>(paper.description || "");
 
   const onBlurName = (event: any) => {
     if (event.target.value.length <= 0) {
@@ -52,52 +56,58 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
   };
 
   useEffect(() => {
-    setContent(decode(paperDatas.paper.content));
-    setIsLoading(false);
+    setContent(decode(paper.content));
   }, []);
+
+  const onSubmit = async (formValues: Paper & { category: string }) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Editing ${formValues.name} paper`,
+    });
+
+    try {
+      const objFormated: Paper = {
+        name: formValues.name,
+        description: formValues.description || "",
+        content: encode(formValues.content) as Base64,
+        createdAt: new Date(formValues.createdAt).getTime(),
+      };
+      const newPaperRawData = { ...paperDataRaw };
+
+      if (formValues.category !== paperCategory) {
+        newPaperRawData[paperCategory].papers.splice(index, 1);
+        newPaperRawData[formValues.category].papers.push(objFormated);
+
+        await updateConfigFile(newPaperRawData);
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Success";
+
+        push(<ListMode />)
+        return;
+      }
+
+      newPaperRawData[formValues.category].papers[index] = { ...objFormated };
+
+      await updateConfigFile(newPaperRawData);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Success";
+
+      push(<ListMode />)
+    } catch(error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Oups.. An error occured, please try again";
+    }
+  };
 
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={`Edit ${paperDatas.paper.name}`}
+      navigationTitle={`Edit ${paper.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit"
-            onSubmit={(values: Paper & { category: string }) => onSubmit(values, paperDatas.category, paperDatas.index)}
-            icon={Icon.Redo}
-          />
-          <Action
-            title="Go Back To List Mode"
-            autoFocus={true}
-            icon={Icon.List}
-            onAction={() => switchMode("list", paperDatas)}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-          <Action
-            title="Create Paper"
-            onAction={() => switchMode("create-paper")}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-            icon={Icon.Plus}
-          />
-          <Action
-            title="Create New Category"
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => switchMode("create-category")}
-            icon={Icon.NewDocument}
-          />
-          <Action
-            title="Update Category"
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
-            onAction={() => switchMode("update-category")}
-            icon={Icon.Switch}
-          />
-          <Action
-            title="Delete Category"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-            onAction={() => switchMode("delete-category")}
-            icon={Icon.Trash}
-          />
+          <Action.SubmitForm title={`Edit ${paper.name}`} onSubmit={onSubmit}/>
         </ActionPanel>
       }
     >
@@ -153,6 +163,6 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
       />
     </Form>
   );
-});
+}
 
 EditMode.displayName = "EditMode";

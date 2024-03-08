@@ -1,50 +1,65 @@
-import { Action, ActionPanel, Form, Icon } from "@raycast/api";
+import { Form, confirmAlert, Alert, ActionPanel, Action, showToast, Toast, useNavigation} from "@raycast/api";
 import { FC, useState } from "react";
-import { SwitchMode } from "../types";
+import { useGetConfig } from "../hooks/useGetConfig";
+import { useGetCategories } from "../hooks/useGetCategories";
+import { updateConfigFile } from '../utils/updateConfigFile';
+import { ListMode } from "./ListMode";
 
-type DeleteCategoryProps = {
-  switchMode: SwitchMode;
-  categories: Array<string>;
-  onSubmit: (values: { category: string }) => void;
-};
-
-export const DeleteCategory: FC<DeleteCategoryProps> = ({ switchMode, categories, onSubmit }) => {
+export const DeleteCategory: FC = () => {
+  const { isLoading, paperDataRaw } = useGetConfig();
+  const categories = useGetCategories(paperDataRaw);
   const [category, setCategory] = useState<string>();
+  const { push } = useNavigation();
+
+  const onSubmit = async (formValues: { category: string; }) => {
+    const userWanteDelete = await confirmAlert({
+      title: `Delete ${formValues.category} ?`,
+      message: "Are you sur to delete this category all papers related to will be moved in the deleted category",
+      primaryAction: { style: Alert.ActionStyle.Destructive, title: "Delete" },
+    });
+
+    if (userWanteDelete === false) return;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Delete ${category} Category`,
+    });
+
+    try {
+      const newPaperRawData = { ...paperDataRaw };
+
+      if (!newPaperRawData.deleted) {
+        newPaperRawData.deleted = {
+          color: "SecondaryText",
+          papers: [],
+        };
+      }
+
+      newPaperRawData[formValues.category.toLowerCase()].papers.forEach((paper) => newPaperRawData.deleted.papers.push(paper));
+
+      delete newPaperRawData[formValues.category.toLowerCase()];
+
+      await updateConfigFile(newPaperRawData);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Category deleted";
+
+      push(<ListMode />);
+    } catch(error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Oups.. An error occured, please try again";
+    }
+  }
 
   return (
     <Form
+      isLoading={isLoading}
       navigationTitle="Delete Category"
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Redo} title="Delete Category" onSubmit={onSubmit} />
-          <Action
-            title="Go Back To List Mode"
-            autoFocus={true}
-            icon={Icon.List}
-            onAction={() => switchMode("list")}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-          <Action
-            title="Create Paper"
-            onAction={() => switchMode("create-paper")}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-            icon={Icon.Plus}
-          />
-          <Action
-            title="Create New Category"
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => switchMode("create-category")}
-            icon={Icon.NewDocument}
-          />
-          <Action
-            title="Update Category"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-            onAction={() => switchMode("update-category")}
-            icon={Icon.Switch}
-          />
+          <Action.SubmitForm title="Delete category" onSubmit={onSubmit}/>
         </ActionPanel>
-      }
-    >
+      }>
       <Form.Dropdown
         id="category"
         autoFocus={true}

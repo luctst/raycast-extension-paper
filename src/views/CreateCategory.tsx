@@ -1,15 +1,21 @@
-import { Action, ActionPanel, Form, Icon, Color } from "@raycast/api";
+import { Form, Icon, Color, ActionPanel, Action, Toast, showToast, useNavigation } from "@raycast/api";
 import { FC, useRef, useState } from "react";
-import { CategoryToUpdate, SwitchMode } from "../types";
+import { useGetConfig } from '../hooks/useGetConfig';
+import { useGetCategories } from "../hooks/useGetCategories";
+import { updateConfigFile } from '../utils/updateConfigFile';
+import { ListMode } from "./ListMode";
 
-type CreateCategoryProps = {
-  switchMode: SwitchMode;
-  onSubmit: (newCategoryDate: CategoryToUpdate) => void;
-};
+type onSubmitValues = {
+  category: string;
+  color: Color.ColorLike;
+}
 
-export const CreateCategory: FC<CreateCategoryProps> = ({ switchMode, onSubmit }) => {
+export const CreateCategory: FC = () => {
+  const { isLoading, paperDataRaw } = useGetConfig();
+  const categories = useGetCategories(paperDataRaw);
   const [category, setCategory] = useState<string>();
   const [categoryError, setCategoryError] = useState<string | undefined>();
+  const { push } = useNavigation();
 
   const [color, setColor] = useState<string>();
 
@@ -27,35 +33,69 @@ export const CreateCategory: FC<CreateCategoryProps> = ({ switchMode, onSubmit }
     setCategoryError(undefined);
   };
 
+  const onSubmit = async (newCategoryValues: onSubmitValues) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: 'Create New Category',
+    });
+
+    try {
+      if (categories.length === 0) throw new Error('Oups... An error occured, please try again');
+
+      if (
+        newCategoryValues.category.includes(' ') ||
+        newCategoryValues.category.includes('-') ||
+        newCategoryValues.category.includes('_')
+      ) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `Error value - Do not use spaces or dash and lower dash`;
+        return;
+      }
+
+      const categoriesLowerCase = categories.map((category) => category.toLowerCase());
+
+      if (categoriesLowerCase.includes(newCategoryValues.category.toLowerCase().trim())) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `The ${newCategoryValues.category} category already exist`;
+        return;
+      }
+
+      const newPaperRawData = { ...paperDataRaw };
+      newPaperRawData[newCategoryValues.category.toLowerCase()] = {
+        color: newCategoryValues.color,
+        papers: [],
+      };
+
+      await updateConfigFile(newPaperRawData);
+
+      toast.style = Toast.Style.Success;
+      toast.title = `${newCategoryValues.category} created`;
+
+      push(<ListMode />);
+    } catch(error: Error | unknown) {
+      toast.style = Toast.Style.Failure;
+
+      if (error instanceof Error) {
+       toast.title = error.message;
+       return;
+      }
+
+      toast.title = 'Oups... An error occured, please try again';
+    }
+  }
+
   return (
     <Form
+      isLoading={isLoading}
       navigationTitle="Create New Category"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" icon={Icon.Redo} onSubmit={onSubmit} />
-          <Action
-            title="Go Back To List Mode"
-            autoFocus={true}
-            icon={Icon.List}
-            onAction={() => switchMode("list")}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-          <Action
-            title="Update Category"
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
-            onAction={() => switchMode("update-category")}
-            icon={Icon.Switch}
-          />
-          <Action
-            title="Delete Category"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-            onAction={() => switchMode("delete-category")}
-            icon={Icon.Trash}
-          />
+          <Action.SubmitForm title="Create new category" onSubmit={onSubmit}/>
         </ActionPanel>
       }
     >
       <Form.TextField
+        info="Do not use spaces or dash and lower dash."
         id="category"
         title="New Category"
         value={category}
