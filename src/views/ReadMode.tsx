@@ -2,7 +2,7 @@ import {  Detail } from "@raycast/api";
 import { FC, useEffect, useState } from "react";
 import { decode } from "../utils/base64";
 import { Paper } from "../types";
-import { Actions } from "./Actions";
+import { Actions } from "../components/Actions";
 
 type ReadModeProps = {
   paper: Paper

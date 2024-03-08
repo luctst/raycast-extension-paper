@@ -3,7 +3,7 @@ import { FC, useState } from "react";
 import { PaperRawData } from "../types";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
-import { Actions } from "./Actions";
+import { Actions } from "../components/Actions";
 
 type Categories = Array<string>;
 

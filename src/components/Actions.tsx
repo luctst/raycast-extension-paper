@@ -2,8 +2,8 @@ import { ActionPanel, Action, Icon, useNavigation } from '@raycast/api';
 import { FC } from 'react';
 import { Mode, Paper } from '../types';
 
-import { ReadMode } from '../components/ReadMode';
-import { ListMode } from './ListMode';
+import { ReadMode } from '../views/ReadMode';
+import { ListMode } from '../views/ListMode';
 
 type ActionsProps = {
   mode: Mode;
