@@ -1,11 +1,11 @@
-import { showToast, Toast } from '@raycast/api';
-import { useEffect, useState } from 'react';
-import { getConfig } from '../utils/getConfig';
-import { PaperRawData } from '../types';
+import { showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { getConfig } from "../utils/getConfig";
+import { PaperRawData } from "../types";
 
 export function useGetConfig() {
-  const [ isLoading, setIsLoading ] = useState<boolean>(true);
-  const [paperDataRaw, setPaperDataRaw] = useState<PaperRawData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [paperDataRaw, setPaperDataRaw] = useState<PaperRawData | null>(null);
 
   useEffect(() => {
     const getPaper = async () => {
@@ -30,5 +30,5 @@ export function useGetConfig() {
   return {
     isLoading,
     paperDataRaw,
-  }
-};
+  };
+}

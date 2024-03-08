@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api";
-import { FC, useState, useRef } from "react";
+import { FC, useState, useRef, FormEvent } from "react";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
 import { updateConfigFile } from "../utils/updateConfigFile";
@@ -19,8 +19,8 @@ export const UpdateCategory: FC = () => {
 
   const colorsAsArray = useRef<Array<string>>(Object.keys(Color));
 
-  const onBlurCategoryName = (event: any) => {
-    if (event.target.value.length <= 0) {
+  const onBlurCategoryName = (event: unknown) => {
+    if (((event as FormEvent<HTMLSelectElement>).target as HTMLSelectElement).value.length <= 0) {
       if (newCategoryNameError) return;
 
       setNewCategoryNameError("Enter new category name");
@@ -39,11 +39,11 @@ export const UpdateCategory: FC = () => {
 
     try {
       if (
-        formValues.newCategoryName.includes(' ') ||
-        formValues.newCategoryName.includes('-') ||
-        formValues.newCategoryName.includes('_')
+        formValues.newCategoryName.includes(" ") ||
+        formValues.newCategoryName.includes("-") ||
+        formValues.newCategoryName.includes("_")
       ) {
-        throw new Error('Error value - Do not use spaces or dash and lower dash')
+        throw new Error("Error value - Do not use spaces or dash and lower dash");
       }
 
       const categoriesLowerCase = categories.map((category) => category.toLowerCase());
@@ -55,26 +55,26 @@ export const UpdateCategory: FC = () => {
       const newPaperRawData = { ...paperDataRaw };
 
       newPaperRawData[formValues.newCategoryName.toLowerCase()] = {
-      papers: [...newPaperRawData[formValues.category.toLowerCase()].papers],
-      color: formValues.color,
-    };
+        papers: [...newPaperRawData[formValues.category.toLowerCase()].papers],
+        color: formValues.color,
+      };
 
-    delete newPaperRawData[formValues.category.toLowerCase()];
+      delete newPaperRawData[formValues.category.toLowerCase()];
 
-    await updateConfigFile(newPaperRawData);
+      await updateConfigFile(newPaperRawData);
 
-    toast.style = Toast.Style.Success;
-    toast.title = "Category updated";
-    push(<ListMode />);
-    } catch(error: Error | unknown) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Category updated";
+      push(<ListMode />);
+    } catch (error: Error | unknown) {
       toast.style = Toast.Style.Failure;
 
       if (error instanceof Error) {
-       toast.title = error.message;
-       return;
+        toast.title = error.message;
+        return;
       }
 
-      toast.title = 'Oups... An error occured, please try again';
+      toast.title = "Oups... An error occured, please try again";
     }
   };
 
@@ -84,9 +84,10 @@ export const UpdateCategory: FC = () => {
       navigationTitle="Update Category"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Update category" onSubmit={onSubmit}/>
+          <Action.SubmitForm title="Update Category" onSubmit={onSubmit} />
         </ActionPanel>
-      }>
+      }
+    >
       <Form.Dropdown
         id="category"
         autoFocus={true}
@@ -111,7 +112,7 @@ export const UpdateCategory: FC = () => {
       <Form.Dropdown id="color" throttle={true} title="Color" value={color} onChange={setColor}>
         {colorsAsArray.current.map((color: string, i) => (
           <Form.Dropdown.Item
-            // @ts-ignore
+            // @ts-expect-error Raycast Type
             icon={{ source: Icon.Circle, tintColor: Color[color] }}
             key={i}
             title={color}

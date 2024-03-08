@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { PaperRawData } from '../types';
+import { useMemo } from "react";
+import { PaperRawData } from "../types";
 
 export function useGetCategories(dependency: PaperRawData | null): Array<string> {
   return useMemo(() => {

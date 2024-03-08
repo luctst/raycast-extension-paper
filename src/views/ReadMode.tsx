@@ -1,4 +1,4 @@
-import {  Detail } from "@raycast/api";
+import { Detail } from "@raycast/api";
 import { FC, useEffect, useState } from "react";
 import { decode } from "../utils/base64";
 import { Paper } from "../types";
@@ -24,9 +24,9 @@ export const ReadMode: FC<ReadModeProps> = ({ paper, category, index }) => {
       isLoading={isLoading}
       markdown={markdown}
       navigationTitle={paper.name}
-      actions={<Actions mode="read" paper={paper} category={category} index={index}/>}
+      actions={<Actions mode="read" paper={paper} category={category} index={index} />}
     />
   );
-}
+};
 
 ReadMode.displayName = "ReadMode";

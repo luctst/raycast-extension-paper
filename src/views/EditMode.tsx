@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
-import { FC, useEffect, useState } from "react";
+import { FC, FormEvent, useEffect, useState } from "react";
 import { Base64, Paper } from "../types";
 import { decode } from "../utils/base64";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
-import { encode } from '../utils/base64';
+import { encode } from "../utils/base64";
 import { updateConfigFile } from "../utils/updateConfigFile";
 import { ListMode } from "./ListMode";
 
@@ -31,8 +31,8 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
 
   const [description, setDescription] = useState<string>(paper.description || "");
 
-  const onBlurName = (event: any) => {
-    if (event.target.value.length <= 0) {
+  const onBlurName = (event: unknown) => {
+    if (((event as FormEvent<HTMLInputElement>).target as HTMLInputElement).value.length <= 0) {
       if (nameError) return;
 
       setNameError("Enter name");
@@ -43,8 +43,8 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
     setNameError(undefined);
   };
 
-  const onBlurCreatedAt = (event: any) => {
-    if (event.target.value === null) {
+  const onBlurCreatedAt = (event: unknown) => {
+    if (((event as FormEvent<HTMLSelectElement>).target as HTMLSelectElement).value === null) {
       if (createdAtError) return;
 
       setCreatedAtError("Enter date");
@@ -83,7 +83,7 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
         toast.style = Toast.Style.Success;
         toast.title = "Success";
 
-        push(<ListMode />)
+        push(<ListMode />);
         return;
       }
 
@@ -94,8 +94,8 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
       toast.style = Toast.Style.Success;
       toast.title = "Success";
 
-      push(<ListMode />)
-    } catch(error) {
+      push(<ListMode />);
+    } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Oups.. An error occured, please try again";
     }
@@ -107,7 +107,7 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
       navigationTitle={`Edit ${paper.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={`Edit ${paper.name}`} onSubmit={onSubmit}/>
+          <Action.SubmitForm title={`Edit ${paper.name}`} onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
@@ -126,7 +126,7 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
         onChange={setCreatedAt}
         title="Created at"
         storeValue={true}
-        // @ts-ignore
+        // @ts-expect-error Raycast Type
         type={Form.DatePicker.Date}
         error={createdAtError}
         onBlur={onBlurCreatedAt}
@@ -163,6 +163,6 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
       />
     </Form>
   );
-}
+};
 
 EditMode.displayName = "EditMode";

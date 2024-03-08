@@ -1,8 +1,8 @@
-import { Form, confirmAlert, Alert, ActionPanel, Action, showToast, Toast, useNavigation} from "@raycast/api";
+import { Form, confirmAlert, Alert, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { FC, useState } from "react";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
-import { updateConfigFile } from '../utils/updateConfigFile';
+import { updateConfigFile } from "../utils/updateConfigFile";
 import { ListMode } from "./ListMode";
 
 export const DeleteCategory: FC = () => {
@@ -11,7 +11,7 @@ export const DeleteCategory: FC = () => {
   const [category, setCategory] = useState<string>();
   const { push } = useNavigation();
 
-  const onSubmit = async (formValues: { category: string; }) => {
+  const onSubmit = async (formValues: { category: string }) => {
     const userWanteDelete = await confirmAlert({
       title: `Delete ${formValues.category} ?`,
       message: "Are you sur to delete this category all papers related to will be moved in the deleted category",
@@ -35,7 +35,9 @@ export const DeleteCategory: FC = () => {
         };
       }
 
-      newPaperRawData[formValues.category.toLowerCase()].papers.forEach((paper) => newPaperRawData.deleted.papers.push(paper));
+      newPaperRawData[formValues.category.toLowerCase()].papers.forEach((paper) =>
+        newPaperRawData.deleted.papers.push(paper),
+      );
 
       delete newPaperRawData[formValues.category.toLowerCase()];
 
@@ -45,11 +47,11 @@ export const DeleteCategory: FC = () => {
       toast.title = "Category deleted";
 
       push(<ListMode />);
-    } catch(error) {
+    } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Oups.. An error occured, please try again";
     }
-  }
+  };
 
   return (
     <Form
@@ -57,9 +59,10 @@ export const DeleteCategory: FC = () => {
       navigationTitle="Delete Category"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Delete category" onSubmit={onSubmit}/>
+          <Action.SubmitForm title="Delete Category" onSubmit={onSubmit} />
         </ActionPanel>
-      }>
+      }
+    >
       <Form.Dropdown
         id="category"
         autoFocus={true}

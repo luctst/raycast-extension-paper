@@ -1,14 +1,14 @@
 import { Form, Icon, Color, ActionPanel, Action, Toast, showToast, useNavigation } from "@raycast/api";
-import { FC, useRef, useState } from "react";
-import { useGetConfig } from '../hooks/useGetConfig';
+import { FC, FormEvent, useRef, useState } from "react";
+import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
-import { updateConfigFile } from '../utils/updateConfigFile';
+import { updateConfigFile } from "../utils/updateConfigFile";
 import { ListMode } from "./ListMode";
 
 type onSubmitValues = {
   category: string;
   color: Color.ColorLike;
-}
+};
 
 export const CreateCategory: FC = () => {
   const { isLoading, paperDataRaw } = useGetConfig();
@@ -21,8 +21,8 @@ export const CreateCategory: FC = () => {
 
   const colorsAsArray = useRef<Array<string>>(Object.keys(Color));
 
-  const onBlurCategory = (event: any) => {
-    if (event.target.value.length <= 0) {
+  const onBlurCategory = (event: unknown) => {
+    if (((event as FormEvent<HTMLInputElement>).target as HTMLInputElement).value.length <= 0) {
       if (categoryError) return;
 
       setCategoryError("Enter category");
@@ -36,16 +36,16 @@ export const CreateCategory: FC = () => {
   const onSubmit = async (newCategoryValues: onSubmitValues) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: 'Create New Category',
+      title: "Create New Category",
     });
 
     try {
-      if (categories.length === 0) throw new Error('Oups... An error occured, please try again');
+      if (categories.length === 0) throw new Error("Oups... An error occured, please try again");
 
       if (
-        newCategoryValues.category.includes(' ') ||
-        newCategoryValues.category.includes('-') ||
-        newCategoryValues.category.includes('_')
+        newCategoryValues.category.includes(" ") ||
+        newCategoryValues.category.includes("-") ||
+        newCategoryValues.category.includes("_")
       ) {
         toast.style = Toast.Style.Failure;
         toast.title = `Error value - Do not use spaces or dash and lower dash`;
@@ -72,17 +72,17 @@ export const CreateCategory: FC = () => {
       toast.title = `${newCategoryValues.category} created`;
 
       push(<ListMode />);
-    } catch(error: Error | unknown) {
+    } catch (error: Error | unknown) {
       toast.style = Toast.Style.Failure;
 
       if (error instanceof Error) {
-       toast.title = error.message;
-       return;
+        toast.title = error.message;
+        return;
       }
 
-      toast.title = 'Oups... An error occured, please try again';
+      toast.title = "Oups... An error occured, please try again";
     }
-  }
+  };
 
   return (
     <Form
@@ -90,7 +90,7 @@ export const CreateCategory: FC = () => {
       navigationTitle="Create New Category"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create new category" onSubmit={onSubmit}/>
+          <Action.SubmitForm title="Create New Category" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
@@ -107,7 +107,7 @@ export const CreateCategory: FC = () => {
       <Form.Dropdown id="color" throttle={true} title="Color" value={color} onChange={setColor}>
         {colorsAsArray.current.map((color: string, i) => (
           <Form.Dropdown.Item
-            // @ts-ignore
+            // @ts-expect-error Raycast Type
             icon={{ source: Icon.Circle, tintColor: Color[color] }}
             key={i}
             title={color}

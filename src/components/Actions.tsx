@@ -24,7 +24,7 @@ export const Actions: FC<ActionsProps> = ({ mode, paper, category, index }) => {
 
   const onDeletePaper = async (paperCategory: string, paperIndex: number) => {
     const userWanteDelete = await confirmAlert({
-      title: 'Delete Paper',
+      title: "Delete Paper",
       message: "Are you sur to delete this paper it will be placed into the Deleted category",
       primaryAction: { style: Alert.ActionStyle.Destructive, title: "Delete" },
     });
@@ -63,46 +63,71 @@ export const Actions: FC<ActionsProps> = ({ mode, paper, category, index }) => {
       toast.title = "Paper Deleted";
 
       push(<ListMode />);
-    } catch(error) {
+    } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Oups.. An error occured, please try again";
     }
   };
 
   return (
-  <ActionPanel>
-    {
-      mode === 'list' ?
-      <>
-        <Action
-          title="Read Paper"
-          autoFocus={true}
-          icon={Icon.List}
-          onAction={() => push(<ReadMode paper={paper} category={category} index={index} />)}
-        />
-        <Action title="Edit Paper" icon={Icon.Pencil} onAction={() => push(<EditMode paper={paper} index={index} paperCategory={category} />)}/>
-        <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)}/>
-      </>
-      :
-      <>
-        <Action title="Edit Paper" icon={Icon.Pencil} onAction={() => push(<EditMode paper={paper} index={index} paperCategory={category} />)}/>
-        <Action title="List Papers" icon={Icon.List} onAction={() => push(<ListMode />)}/>
-        <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)}/>
-      </>
-    }
-    <Action title="Create New Category" shortcut={{ modifiers: ["cmd"], key: "n" }} icon={Icon.NewDocument} onAction={() => push(<CreateCategory />)}/>
-    <Action title="Update Category" shortcut={{ modifiers: ["cmd"], key: "u" }} icon={Icon.Switch} onAction={() => push(<UpdateCategory />)}/>
-    <ActionPanel.Section title="Danger zone">
-      <Action title="Delete Category" shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }} icon={Icon.Trash} style={Action.Style.Destructive}  onAction={() => push(<DeleteCategory />)}/>
+    <ActionPanel>
+      {mode === "list" ? (
+        <>
+          <Action
+            title="Read Paper"
+            autoFocus={true}
+            icon={Icon.List}
+            onAction={() => push(<ReadMode paper={paper} category={category} index={index} />)}
+          />
+          <Action
+            title="Edit Paper"
+            icon={Icon.Pencil}
+            onAction={() => push(<EditMode paper={paper} index={index} paperCategory={category} />)}
+          />
+          <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)} />
+        </>
+      ) : (
+        <>
+          <Action
+            title="Edit Paper"
+            icon={Icon.Pencil}
+            onAction={() => push(<EditMode paper={paper} index={index} paperCategory={category} />)}
+          />
+          <Action title="List Papers" icon={Icon.List} onAction={() => push(<ListMode />)} />
+          <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)} />
+        </>
+      )}
       <Action
-        title="Delete Paper"
-        shortcut={{ modifiers: ["cmd"], key: "deleteForward" }}
-        icon={Icon.Trash}
-        style={Action.Style.Destructive}
-        onAction={() => { onDeletePaper(category, index) }}
+        title="Create New Category"
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        icon={Icon.NewDocument}
+        onAction={() => push(<CreateCategory />)}
       />
-    </ActionPanel.Section>
-  </ActionPanel>
+      <Action
+        title="Update Category"
+        shortcut={{ modifiers: ["cmd"], key: "u" }}
+        icon={Icon.Switch}
+        onAction={() => push(<UpdateCategory />)}
+      />
+      <ActionPanel.Section title="Danger zone">
+        <Action
+          title="Delete Category"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={() => push(<DeleteCategory />)}
+        />
+        <Action
+          title="Delete Paper"
+          shortcut={{ modifiers: ["cmd"], key: "deleteForward" }}
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={() => {
+            onDeletePaper(category, index);
+          }}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 };
 
