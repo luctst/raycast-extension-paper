@@ -1,25 +1,27 @@
-import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
-import { FC, memo, useState } from "react";
-import { Paper, PaperRawData, SwitchMode } from "../types";
+import { List, Icon, Color } from "@raycast/api";
+import { FC, useState } from "react";
+import { PaperRawData } from "../types";
+import { useGetConfig } from "../hooks/useGetConfig";
+import { useGetCategories } from "../hooks/useGetCategories";
+import { Actions } from "./Actions";
 
-type ListModeProps = {
-  isLoading: boolean;
-  paperDataRaw: PaperRawData;
-  switchMode: SwitchMode;
-  categories: Array<string>;
-  onActionDeletePaper: (category: string, index: number) => void;
-};
+type Categories = Array<string>;
 
 type PaperSearchBarDropdownProps = {
   onChange: (value: string) => void;
   isLoading: boolean;
-  categories: Array<string>;
+  categories: Categories;
 };
 
-type ListItemActionsProps = {
-  paper: Paper;
+type ListWrapperItemProps = {
   category: string;
-  index: number;
+  paperDataRaw: PaperRawData | null;
+};
+
+type ListWrapperProps = {
+  categories: Categories;
+  categoryActive: string;
+  papersData: PaperRawData | null;
 };
 
 const PaperSearchBarDropdown: FC<PaperSearchBarDropdownProps> = ({ onChange, isLoading, categories }) => {
@@ -40,130 +42,65 @@ const PaperSearchBarDropdown: FC<PaperSearchBarDropdownProps> = ({ onChange, isL
   );
 };
 
-export const ListMode: FC<ListModeProps> = memo(function ListMode({
-  paperDataRaw,
-  isLoading,
-  switchMode,
-  categories,
-  onActionDeletePaper,
-}) {
-  const [categoryActive, setCategoryActive] = useState<string>();
+const ListWrapperItem: FC<ListWrapperItemProps> = ({ category, paperDataRaw }) => {
+  if (paperDataRaw === null) return;
+
+  return (
+    <List.Section title={category} subtitle={paperDataRaw[category].papers.length.toString()}>
+      {paperDataRaw[category].papers.map((paper, i) => (
+        <List.Item
+          key={i}
+          title={paper.name}
+          accessories={[
+            // @ts-ignore
+            { text: { value: paper.description || "", color: Color[paperDataRaw[category].color] } },
+            { date: new Date(paper.createdAt), icon: Icon.Calendar },
+          ]}
+          // @ts-ignore
+          icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[category].color] }}
+          actions={<Actions mode="list" paper={paper}/>}
+        />
+      ))}
+    </List.Section>
+  );
+}
+
+const ListWrapper: FC<ListWrapperProps> = ({ categories, categoryActive, papersData }) => {
+  if (categories.length === 0) return null;
+
+  if (categoryActive === 'all') {;
+    return categories.map((category, i) => {
+      const categoryLowerCase = category.toLowerCase();
+
+      if (categoryLowerCase === 'deleted') return null;
+      return <ListWrapperItem category={categoryLowerCase} paperDataRaw={papersData} key={i}/>;
+    });
+  }
+
+  return <ListWrapperItem category={categoryActive} paperDataRaw={papersData} />
+};
+
+export const ListMode: FC = () => {
+  const { isLoading, paperDataRaw } = useGetConfig();
+  const categories = useGetCategories(paperDataRaw);
+  const [ categoryActive, setCategoryActive] = useState<string>('all');
 
   const onChange = (value: string) => {
     setCategoryActive(value);
   };
 
-  const ListItemActions: FC<ListItemActionsProps> = ({ paper, category, index }) => {
-    return (
-      <ActionPanel>
-        <Action
-          title="Read Paper"
-          autoFocus={true}
-          onAction={() => {
-            switchMode("read", { paper, category, index });
-          }}
-          icon={Icon.List}
-        />
-        <Action
-          title="Create Paper"
-          onAction={() => switchMode("create-paper")}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-          icon={Icon.Plus}
-        />
-        <Action
-          title="Edit Paper"
-          onAction={() => switchMode("edit", { paper, category, index })}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
-          icon={Icon.Pencil}
-        />
-        <Action
-          title="Create New Category"
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
-          onAction={() => switchMode("create-category")}
-          icon={Icon.NewDocument}
-        />
-        <Action
-          title="Update Category"
-          shortcut={{ modifiers: ["cmd"], key: "u" }}
-          onAction={() => switchMode("update-category")}
-          icon={Icon.Switch}
-        />
-        <Action
-          title="Delete Category"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-          onAction={() => switchMode("delete-category")}
-          icon={Icon.Trash}
-        />
-        <Action
-          title="Delete Paper"
-          shortcut={{ modifiers: ["cmd"], key: "deleteForward" }}
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={() => onActionDeletePaper(category, index)}
-        />
-      </ActionPanel>
-    );
-  };
-
-  ListItemActions.displayName = "ListItemActions";
-
-  const ListToRender: FC = () => {
-    if (!categoryActive || !paperDataRaw) return;
-    if (categoryActive === "all") {
-      const categories = Object.keys(paperDataRaw);
-
-      return categories.map((category, y) => {
-        if (category === "deleted") return null;
-
-        return (
-          <List.Section title={category} subtitle={paperDataRaw[category].papers.length.toString()} key={y}>
-            {paperDataRaw[category].papers.map((paper, i) => (
-              <List.Item
-                key={i}
-                title={paper.name}
-                accessories={[
-                  { text: { value: paper.description || "", color: Color[paperDataRaw[category].color] } },
-                  { date: new Date(paper.createdAt), icon: Icon.Calendar },
-                ]}
-                icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[category].color] }}
-                actions={<ListItemActions paper={paper} category={category} index={i} />}
-              />
-            ))}
-          </List.Section>
-        );
-      });
-    }
-
-    ListToRender.displayName = "ListToRender";
-
-    return (
-      <List.Section title={categoryActive} subtitle={paperDataRaw[categoryActive].papers.length.toString()}>
-        {paperDataRaw[categoryActive].papers.map((paper, p) => (
-          <List.Item
-            title={paper.name}
-            key={p}
-            icon={{ source: Icon.Circle, tintColor: Color[paperDataRaw[categoryActive].color] }}
-            accessories={[
-              { text: { value: paper.description || "", color: Color[paperDataRaw[categoryActive].color] } },
-              { date: new Date(paper.createdAt), icon: Icon.Calendar },
-            ]}
-            actions={<ListItemActions paper={paper} category={categoryActive} index={p} />}
-          />
-        ))}
-      </List.Section>
-    );
-  };
-
   return (
     <List
-      searchBarPlaceholder={isLoading ? "Fetching..." : "Search a paper"}
-      searchBarAccessory={<PaperSearchBarDropdown onChange={onChange} isLoading={isLoading} categories={categories} />}
-      throttle={true}
+      searchBarPlaceholder={isLoading ? "Fetching Papers.." : "Search Paper"}
       isLoading={isLoading}
-    >
-      <ListToRender />
+      searchBarAccessory={<PaperSearchBarDropdown categories={categories} isLoading={isLoading} onChange={onChange}/>}
+      throttle={true}>
+      <ListWrapper categories={categories} categoryActive={categoryActive} papersData={paperDataRaw} />
     </List>
   );
-});
+};
 
+PaperSearchBarDropdown.displayName = "PaperSearchBarDropdown";
+ListWrapper.displayName = 'ListWrapper';
+ListWrapperItem.displayName = 'ListWrapperItem';
 ListMode.displayName = "ListMode";

@@ -15,7 +15,7 @@ export const CreateCategory: FC<CreateCategoryProps> = ({ switchMode, onSubmit }
 
   const colorsAsArray = useRef<Array<string>>(Object.keys(Color));
 
-  const onBlurCategory = (event) => {
+  const onBlurCategory = (event: any) => {
     if (event.target.value.length <= 0) {
       if (categoryError) return;
 
@@ -67,6 +67,7 @@ export const CreateCategory: FC<CreateCategoryProps> = ({ switchMode, onSubmit }
       <Form.Dropdown id="color" throttle={true} title="Color" value={color} onChange={setColor}>
         {colorsAsArray.current.map((color: string, i) => (
           <Form.Dropdown.Item
+            // @ts-ignore
             icon={{ source: Icon.Circle, tintColor: Color[color] }}
             key={i}
             title={color}

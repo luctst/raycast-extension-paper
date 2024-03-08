@@ -18,7 +18,7 @@ export const UpdateCategory: FC<UpdateCategoryProps> = ({ categories, switchMode
 
   const colorsAsArray = useRef<Array<string>>(Object.keys(Color));
 
-  const onBlurCategoryName = (event) => {
+  const onBlurCategoryName = (event: any) => {
     if (event.target.value.length <= 0) {
       if (newCategoryNameError) return;
 
@@ -82,6 +82,7 @@ export const UpdateCategory: FC<UpdateCategoryProps> = ({ categories, switchMode
       <Form.Dropdown id="color" throttle={true} title="Color" value={color} onChange={setColor}>
         {colorsAsArray.current.map((color: string, i) => (
           <Form.Dropdown.Item
+            // @ts-ignore
             icon={{ source: Icon.Circle, tintColor: Color[color] }}
             key={i}
             title={color}

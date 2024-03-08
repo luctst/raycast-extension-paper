@@ -27,7 +27,7 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
 
   const [description, setDescription] = useState<string>(defaultValues.description || "");
 
-  const onBlurName = (event) => {
+  const onBlurName = (event: any) => {
     if (event.target.value.length <= 0) {
       if (nameError) return;
 
@@ -39,7 +39,7 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
     setNameError(undefined);
   };
 
-  const onBlurCreatedAt = (event) => {
+  const onBlurCreatedAt = (event: any) => {
     if (event.target.value === null) {
       if (createdAtError) return;
 
@@ -116,6 +116,7 @@ export const EditMode: FC<EditModeProps> = memo(function EditMode({ paperDatas, 
         onChange={setCreatedAt}
         title="Created at"
         storeValue={true}
+        // @ts-ignore
         type={Form.DatePicker.Date}
         error={createdAtError}
         onBlur={onBlurCreatedAt}

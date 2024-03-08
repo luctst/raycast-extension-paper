@@ -23,7 +23,7 @@ export const CreatePaper: FC<CreatePaperProps> = ({ categories, switchMode, onSu
 
   const [description, setDescription] = useState<string>();
 
-  const onBlurName = (event) => {
+  const onBlurName = (event: any) => {
     if (event.target.value.length <= 0) {
       if (nameError) return;
 
@@ -35,7 +35,7 @@ export const CreatePaper: FC<CreatePaperProps> = ({ categories, switchMode, onSu
     setNameError(undefined);
   };
 
-  const onBlurCreatedAt = (event) => {
+  const onBlurCreatedAt = (event: any) => {
     if (event.target.value === null) {
       if (createdAtError) return;
 
@@ -94,6 +94,7 @@ export const CreatePaper: FC<CreatePaperProps> = ({ categories, switchMode, onSu
         value={createdAt}
         onChange={setCreatedAt}
         title="Created at"
+        // @ts-ignore
         type={Form.DatePicker.Date}
         error={createdAtError}
         onBlur={onBlurCreatedAt}
