@@ -36,7 +36,7 @@ export const CreatePaper: FC = () => {
         toast.title = "Paper Created";
 
         push(<ListMode />);
-      } catch(error) {
+      } catch (error) {
         return false;
       }
     },
@@ -45,7 +45,7 @@ export const CreatePaper: FC = () => {
       createdAt: FormValidation.Required,
       category: FormValidation.Required,
     },
-  })
+  });
 
   return (
     <Form
@@ -57,24 +57,20 @@ export const CreatePaper: FC = () => {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Name of Your paper"
-        placeholder="Enter the name of your new paper"
-        { ...itemProps.name }
-      />
+      <Form.TextField title="Name of Your paper" placeholder="Enter the name of your new paper" {...itemProps.name} />
       <Form.DatePicker
         title="Created at"
         // @ts-expect-error Raycast Type
         type={Form.DatePicker.Date}
-        { ...itemProps.createdAt }
+        {...itemProps.createdAt}
       />
       <Form.TextArea
         title="Content"
         enableMarkdown={true}
         placeholder="Write anything you want, you can use Markdown syntax"
-        { ...itemProps.content }
+        {...itemProps.content}
       />
-      <Form.Dropdown title="Category" throttle={true} { ...itemProps.category }>
+      <Form.Dropdown title="Category" throttle={true} {...itemProps.category}>
         {categories.map((category, index) => {
           if (category === "Deleted") return null;
           return <Form.Dropdown.Item title={category} value={category.toLowerCase()} key={index} />;
@@ -84,7 +80,7 @@ export const CreatePaper: FC = () => {
         placeholder="Enter a description"
         info="Optional field"
         title="Description"
-        { ...itemProps.description }
+        {...itemProps.description}
       />
     </Form>
   );

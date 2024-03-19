@@ -35,7 +35,7 @@ export const CreateCategory: FC = () => {
         toast.title = `${values.category} created`;
 
         push(<ListMode />);
-      } catch(error) {
+      } catch (error) {
         return false;
       }
     },

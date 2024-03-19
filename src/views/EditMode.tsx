@@ -56,7 +56,7 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
         toast.title = "Success";
 
         push(<ListMode />);
-      } catch(error) {
+      } catch (error) {
         return false;
       }
     },
@@ -69,12 +69,12 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
       name: paper.name,
       createdAt: new Date(paper.createdAt),
       category: paperCategory,
-      description: paper.description || ""
+      description: paper.description || "",
     },
-  })
+  });
 
   useEffect(() => {
-    setValue('content', decode(paper.content));
+    setValue("content", decode(paper.content));
   }, []);
 
   return (
@@ -87,30 +87,16 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Name of your paper"
-        storeValue={true}
-        { ...itemProps.name }
-      />
+      <Form.TextField title="Name of your paper" storeValue={true} {...itemProps.name} />
       <Form.DatePicker
         title="Created at"
         storeValue={true}
         // @ts-expect-error Raycast Type
         type={Form.DatePicker.Date}
-        { ...itemProps.createdAt }
+        {...itemProps.createdAt}
       />
-      <Form.TextArea
-        storeValue={true}
-        title="Content"
-        enableMarkdown={true}
-        { ...itemProps.content }
-      />
-      <Form.Dropdown
-        title="Category"
-        storeValue={true}
-        throttle={true}
-        { ...itemProps.category }
-      >
+      <Form.TextArea storeValue={true} title="Content" enableMarkdown={true} {...itemProps.content} />
+      <Form.Dropdown title="Category" storeValue={true} throttle={true} {...itemProps.category}>
         {categories.map((category, index) => {
           if (category === "Deleted") return null;
           return <Form.Dropdown.Item title={category} value={category.toLowerCase()} key={index} />;
@@ -121,7 +107,7 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
         info="Optional field"
         storeValue={true}
         title="Description"
-        { ...itemProps.description }
+        {...itemProps.description}
       />
     </Form>
   );

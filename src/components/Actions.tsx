@@ -84,7 +84,12 @@ export const Actions: FC<ActionsProps> = ({ mode, paper, category, index }) => {
             icon={Icon.Pencil}
             onAction={() => push(<EditMode paper={paper} index={index} paperCategory={category} />)}
           />
-          <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)} shortcut={{ modifiers: ["cmd"], key: "n" }}/>
+          <Action
+            title="Create Paper"
+            icon={Icon.Plus}
+            onAction={() => push(<CreatePaper />)}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
         </>
       ) : (
         <>
@@ -94,7 +99,12 @@ export const Actions: FC<ActionsProps> = ({ mode, paper, category, index }) => {
             onAction={() => push(<EditMode paper={paper} index={index} paperCategory={category} />)}
           />
           <Action title="List Papers" icon={Icon.List} onAction={() => push(<ListMode />)} />
-          <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)} shortcut={{ modifiers: ["cmd"], key: "n" }}/>
+          <Action
+            title="Create Paper"
+            icon={Icon.Plus}
+            onAction={() => push(<CreatePaper />)}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
         </>
       )}
       <Action
