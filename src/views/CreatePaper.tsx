@@ -58,7 +58,7 @@ export const CreatePaper: FC = () => {
       }
     >
       <Form.TextField
-        title="Name of your paper"
+        title="Name of Your paper"
         placeholder="Enter the name of your new paper"
         { ...itemProps.name }
       />
