@@ -8,13 +8,14 @@ import { ListMode } from "./ListMode";
 
 type onSubmitValues = {
   category: string;
-  color: Color.ColorLike;
+  color: string;
 };
 
 export const CreateCategory: FC = () => {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
   const { push } = useNavigation();
+  const colorsAsArray = useRef<Array<string>>(Object.keys(Color));
   const { handleSubmit, itemProps } = useForm<onSubmitValues>({
     async onSubmit(values) {
       try {
@@ -52,8 +53,6 @@ export const CreateCategory: FC = () => {
     },
   });
 
-  const colorsAsArray = useRef<Array<string>>(Object.keys(Color));
-
   return (
     <Form
       isLoading={isLoading}
@@ -71,13 +70,13 @@ export const CreateCategory: FC = () => {
         {...itemProps.category}
       />
       <Form.Dropdown title="Color" {...itemProps.color}>
-        {colorsAsArray.current.map((color: string, i) => (
+        {colorsAsArray.current.map((color, i) => (
           <Form.Dropdown.Item
             // @ts-expect-error Raycast Type
             icon={{ source: Icon.Circle, tintColor: Color[color] }}
             key={i}
-            title={color}
-            value={color}
+            title={String(color)}
+            value={String(color)}
           />
         ))}
       </Form.Dropdown>

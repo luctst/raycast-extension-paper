@@ -1,7 +1,7 @@
 import { ActionPanel, Form, Action, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { FC } from "react";
-import { Paper, Base64 } from "../types";
+import { Base64 } from "../types";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
 import { encode } from "../utils/base64";
@@ -12,7 +12,13 @@ export const CreatePaper: FC = () => {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
   const { push } = useNavigation();
-  const { handleSubmit, itemProps } = useForm<Paper & { category: string }>({
+  const { handleSubmit, itemProps } = useForm<{
+    name: string;
+    createdAt: Date | null;
+    content: string;
+    category: string;
+    description?: string;
+  }>({
     async onSubmit(values) {
       try {
         const toast = await showToast({
@@ -25,7 +31,7 @@ export const CreatePaper: FC = () => {
           name: values.name,
           description: values.description || "",
           content: encode(values.content) as Base64,
-          createdAt: new Date(values.createdAt).getTime(),
+          createdAt: new Date(values.createdAt as Date).getTime(),
         };
 
         newPaperRawData[values.category.toLowerCase()].papers.push({ ...newPaper });
